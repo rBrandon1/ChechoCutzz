@@ -19,8 +19,8 @@ import { Badge } from "@/components/ui/badge";
 import { roleCheck } from "@/lib/roleCheck";
 
 export default function NavBar() {
-  const { user, isAuthenticated } = useKindeBrowserClient();
-  const userRole = roleCheck();
+  const { user, isAuthenticated, permissions } = useKindeBrowserClient();
+  const userRole = roleCheck(permissions);
 
   return (
     <NavigationMenu>

@@ -37,7 +37,7 @@ export default function Home() {
       };
       createUser(userData);
     }
-  }, [user]);
+  }, [user, permissions]);
 
   return (
     <div>
