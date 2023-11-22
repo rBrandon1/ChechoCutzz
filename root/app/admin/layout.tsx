@@ -1,4 +1,10 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Admin Panel",
+  description: "Admin page",
+};
 
 export default async function AdminLayout({
   children,

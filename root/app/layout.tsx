@@ -3,7 +3,15 @@ import { Playfair_Display } from "next/font/google";
 import NavBar from "@/components/NavBar";
 import Link from "next/link";
 import { Toaster } from "@/components/ui/toaster";
+import { Metadata } from "next";
+import Head from "next/head";
+import { ScissorsIcon } from "@radix-ui/react-icons";
 
+export const metadata: Metadata = {
+  title: "ChechoCutzz",
+  description:
+    "Website for booking haircuts with Sergio, a barber in Canby, OR.",
+};
 export const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -17,6 +25,8 @@ export default async function RootLayout({
   return (
     <html lang="en" className={playfair.className}>
       <body className="flex flex-col min-h-screen bg-background">
+        <link rel="icon" type="image/icon" href="/barber.png" />
+
         <NavBar />
         <div className="mx-6 mt-6 tracking-wider text-[16px]">
           <main className="flex-grow">{children}</main>
