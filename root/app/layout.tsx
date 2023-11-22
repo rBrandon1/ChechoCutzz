@@ -1,69 +1,49 @@
 import "./globals.css";
-import { LoginLink, LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { Playfair_Display } from "next/font/google";
+import NavBar from "@/components/NavBar";
+import Link from "next/link";
+import { Toaster } from "@/components/ui/toaster";
 
-export const metadata = {
-  title: "ChechoCutzz",
-  description: "Best barber in all of Mexico.",
-};
+export const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthenticated, getAccessToken, getUser } = getKindeServerSession();
-  const accessToken: any = await getAccessToken();
-  const user: any = await getUser();
-
   return (
-    <html lang="en">
-      <body>
-        <header>
-          <nav className="">
-            <h1 className="">ChechoCutzz</h1>
-            {accessToken?.permissions == "admin" && (
-              <span>
-                <p className="text-sm text-gray-400">Admin</p>
-              </span>
-            )}
-
+    <html lang="en" className={playfair.className}>
+      <body className="flex flex-col min-h-screen bg-background">
+        <NavBar />
+        <div className="mx-6 mt-6 tracking-wider text-[16px]">
+          <main className="flex-grow">{children}</main>
+          <Toaster />
+        </div>
+        <footer className="border-t my-8 p-4 w-full text-center">
+          <div className="grid grid-flow-col divide-x mx-auto items-center">
             <div>
-              {!(await isAuthenticated()) ? (
-                <>
-                  <LoginLink className="btn btn-dark">Sign up</LoginLink>
-                </>
-              ) : (
-                <div className="">
-                  {user?.picture ? (
-                    <img
-                      className=""
-                      src={user?.picture}
-                      alt="user profile avatar"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <div className="">
-                      {user?.given_name?.[0]}
-                      {user?.family_name?.[0]}
-                    </div>
-                  )}
-                  <div>
-                    <p className="">
-                      {user?.given_name} {user?.family_name}
-                    </p>
-
-                    <LogoutLink className="">Log out</LogoutLink>
-                  </div>
-                </div>
-              )}
+              <Link
+                href="https://brandnramirez.com"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-2 text-muted-foreground hover:text-accent"
+              >
+                © Brandon Ramirez {new Date().getFullYear()}
+              </Link>
             </div>
-          </nav>
-        </header>
-        <main>{children}</main>
-        <footer className="footer">
-          <div className="">
-            <small className="">coming December 25, 2023.</small>
+            <div>
+              <Link
+                href="/admin"
+                target="_blank"
+                rel="noreferrer"
+                className="text-accent-foreground hover:text-accent"
+              >
+                Admin Panel
+              </Link>
+            </div>
           </div>
         </footer>
       </body>
