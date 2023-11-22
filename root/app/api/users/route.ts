@@ -6,9 +6,9 @@ export async function GET() {
   try {
     const { getAccessToken } = getKindeServerSession();
     const accessToken: any = await getAccessToken();
-    // if (accessToken?.permissions != "admin") {
-    //   return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
-    // }
+    if (accessToken?.permissions != "admin") {
+      return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
+    }
 
     const users = await prisma.user.findMany({
       select: {
@@ -36,10 +36,10 @@ export async function POST(req: NextRequest) {
   try {
     const { getAccessToken } = getKindeServerSession();
     const accessToken: any = await getAccessToken();
+    if (accessToken?.permissions != "admin") {
+      return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
+    }
 
-    // if (accessToken?.permissions != "admin") {
-    //   return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
-    // }
     const body: any = await req.json();
     const { id, email, firstName, lastName, role } = body;
     const newUser = await prisma.user.upsert({

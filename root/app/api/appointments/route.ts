@@ -96,9 +96,9 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   const { getAccessToken } = getKindeServerSession();
   const accessToken: any = await getAccessToken();
-  // if (accessToken?.permissions != "admin") {
-  //   return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
-  // }
+  if (accessToken?.permissions != "admin") {
+    return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
+  }
 
   const body: any = await req.json();
   const { id, dateTime, firstName, lastName, clientEmail, userId, status } =
@@ -150,19 +150,19 @@ export async function PUT(req: NextRequest) {
     throw new Error("Missing dateTime");
   }
 
-  // transporter.sendMail(clientMailOptions, (error, info) => {
-  //   if (error) {
-  //     console.log("Email Error: ", error);
-  //   }
-  //   console.log("Email sent: ", info.response);
-  // });
+  transporter.sendMail(clientMailOptions, (error, info) => {
+    if (error) {
+      console.log("Email Error: ", error);
+    }
+    console.log("Email sent: ", info.response);
+  });
 
-  // transporter.sendMail(adminMailOptions, (error, info) => {
-  //   if (error) {
-  //     console.log("Email Error: ", error);
-  //   }
-  //   console.log("Email sent: ", info.response);
-  // });
+  transporter.sendMail(adminMailOptions, (error, info) => {
+    if (error) {
+      console.log("Email Error: ", error);
+    }
+    console.log("Email sent: ", info.response);
+  });
 
   return NextResponse.json({
     updatedAppointment,
@@ -225,19 +225,19 @@ export async function DELETE(req: NextRequest) {
       html: adminEmailContent,
     };
 
-    // transporter.sendMail(clientMailOptions, (error, info) => {
-    //   if (error) {
-    //     console.log("Email Error: ", error);
-    //   }
-    //   console.log("Email sent: ", info.response);
-    // });
+    transporter.sendMail(clientMailOptions, (error, info) => {
+      if (error) {
+        console.log("Email Error: ", error);
+      }
+      console.log("Email sent: ", info.response);
+    });
 
-    // transporter.sendMail(adminMailOptions, (error, info) => {
-    //   if (error) {
-    //     console.log("Email Error: ", error);
-    //   }
-    //   console.log("Email sent: ", info.response);
-    // });
+    transporter.sendMail(adminMailOptions, (error, info) => {
+      if (error) {
+        console.log("Email Error: ", error);
+      }
+      console.log("Email sent: ", info.response);
+    });
   }
 
   await prisma.appointment.delete({ where: { id } });

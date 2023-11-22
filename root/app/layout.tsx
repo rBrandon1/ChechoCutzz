@@ -1,13 +1,8 @@
 import "./globals.css";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Playfair_Display } from "next/font/google";
 import NavBar from "@/components/NavBar";
 import Link from "next/link";
 import { Toaster } from "@/components/ui/toaster";
-
-export const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
 
 export const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -21,7 +16,7 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="en" className={playfair.className}>
-      <body className="flex flex-col min-h-screen">
+      <body className="flex flex-col min-h-screen bg-background">
         <NavBar />
         <div className="mx-6 mt-6 tracking-wider text-[16px]">
           <main className="flex-grow">{children}</main>
