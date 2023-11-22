@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { Button } from "@/components/ui/button";
 import { InstagramLogoIcon } from "@radix-ui/react-icons";
+import Image from "next/image";
 
 export default function Home() {
   const { user, permissions } = useKindeBrowserClient();
@@ -69,28 +70,28 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="w-full h-auto max-w-md mx-auto">
-            <img
+            <Image
               src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(73).webp"
               alt="Description"
               className="object-contain w-full h-full rounded-md"
             />
           </div>
           <div className="w-full h-auto max-w-md mx-auto">
-            <img
+            <Image
               src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(76).webp"
               alt="Description"
               className="object-contain w-full h-full rounded-md"
             />
           </div>
           <div className="w-full h-auto max-w-md mx-auto">
-            <img
+            <Image
               src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(75).webp"
               alt="Description"
               className="object-contain w-full h-full rounded-md"
             />
           </div>
           <div className="w-full h-auto max-w-md mx-auto">
-            <img
+            <Image
               src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(70).webp"
               alt="Description"
               className="object-contain w-full h-full rounded-md"
