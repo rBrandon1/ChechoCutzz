@@ -70,29 +70,29 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="w-full h-auto max-w-md mx-auto">
-            <Image
-              src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(73).webp"
+            <img
+              src="https://picsum.photos/200"
               alt="Description"
               className="object-contain w-full h-full rounded-md"
             />
           </div>
           <div className="w-full h-auto max-w-md mx-auto">
-            <Image
-              src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(76).webp"
+            <img
+              src="https://picsum.photos/200"
               alt="Description"
               className="object-contain w-full h-full rounded-md"
             />
           </div>
           <div className="w-full h-auto max-w-md mx-auto">
-            <Image
-              src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(75).webp"
+            <img
+              src="https://picsum.photos/200"
               alt="Description"
               className="object-contain w-full h-full rounded-md"
             />
           </div>
           <div className="w-full h-auto max-w-md mx-auto">
-            <Image
-              src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(70).webp"
+            <img
+              src="https://picsum.photos/200"
               alt="Description"
               className="object-contain w-full h-full rounded-md"
             />
