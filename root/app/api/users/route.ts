@@ -13,7 +13,8 @@ export async function GET() {
     const users = await prisma.user.findMany({
       select: {
         id: true,
-        name: true,
+        firstName: true,
+        lastName: true,
         email: true,
         role: true,
       },
@@ -40,11 +41,11 @@ export async function POST(req: NextRequest) {
     //   return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
     // }
     const body: any = await req.json();
-    const { id, email, name, role } = body;
+    const { id, email, firstName, lastName, role } = body;
     const newUser = await prisma.user.upsert({
       where: { id },
-      update: { email, name, role },
-      create: { id, email, name, role },
+      update: { email, firstName, lastName, role },
+      create: { id, email, firstName, lastName, role },
     });
     return NextResponse.json({
       newUser,

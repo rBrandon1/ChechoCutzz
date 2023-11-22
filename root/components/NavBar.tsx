@@ -1,0 +1,77 @@
+"use client";
+
+import Link from "next/link";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  LoginLink,
+  LogoutLink,
+  useKindeBrowserClient,
+} from "@kinde-oss/kinde-auth-nextjs";
+import { Badge } from "@/components/ui/badge";
+import { roleCheck } from "@/lib/roleCheck";
+
+export default function NavBar() {
+  const { user, isAuthenticated } = useKindeBrowserClient();
+  const userRole = roleCheck();
+
+  return (
+    <NavigationMenu>
+      <NavigationMenuList className="flex justify-between items-center">
+        <div className="flex">
+          <h1 className="text-xl font-bold pr-4 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">
+            <Link href="/">ChechoCutzz</Link>
+          </h1>
+          <div>
+            {userRole === "admin" && (
+              <Badge
+                variant="outline"
+                className="drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]"
+              >
+                Admin
+              </Badge>
+            )}
+          </div>
+        </div>
+
+        {!isAuthenticated ? (
+          <>
+            <LoginLink className="p-1 bg-primary text-secondary rounded-md">
+              Sign in
+            </LoginLink>
+          </>
+        ) : (
+          <NavigationMenuItem>
+            <NavigationMenuTrigger>
+              <Avatar>
+                <AvatarImage src={user?.picture as string} />
+                <AvatarFallback>{user?.picture?.slice(0, 2)}</AvatarFallback>
+              </Avatar>
+            </NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <ul className="grid gap-3 p-4 w-full ">
+                <li>
+                  <NavigationMenuLink asChild>
+                    <Link href="/appointments" target="_blank" rel="noreferrer">
+                      Appointments
+                    </Link>
+                  </NavigationMenuLink>
+                </li>
+                <LogoutLink className="p-1 text-destructive rounded-md">
+                  Sign out
+                </LogoutLink>
+              </ul>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+        )}
+      </NavigationMenuList>
+    </NavigationMenu>
+  );
+}
