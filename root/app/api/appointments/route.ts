@@ -10,11 +10,11 @@ import AdminDeleteEmail from "@/components/AdminDeleteEmail";
 
 export async function GET(req: NextRequest) {
   try {
-    const { getAccessToken } = getKindeServerSession();
-    const accessToken: any = await getAccessToken();
-    if (accessToken?.permissions != "admin") {
-      return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
-    }
+    // const { getAccessToken } = getKindeServerSession();
+    // const accessToken: any = await getAccessToken();
+    // if (accessToken?.permissions != "admin") {
+    //   return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
+    // }
 
     const { searchParams } = new URL(req.nextUrl);
     const userId = searchParams.get("userId");

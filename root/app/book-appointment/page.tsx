@@ -54,8 +54,7 @@ export default function BookAppointment() {
     });
 
     if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.message || "Something went wrong!");
+      throw new Error("Something went wrong!");
     }
 
     await mutate((currentData: any) => {
