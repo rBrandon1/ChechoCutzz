@@ -19,7 +19,7 @@ import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 
 export default function UserAppointments() {
   const { user, isLoading } = useKindeBrowserClient();
-  const { data } = useSWR(
+  const { data: appointmentsData } = useSWR(
     user ? `/api/appointments?userId=${user?.id}` : null,
     fetcher
   );
@@ -27,8 +27,8 @@ export default function UserAppointments() {
   const [previousAppointments, setPreviousAppointments] = useState([]);
 
   useEffect(() => {
-    if (data?.appointments) {
-      const sortedAppointments = data?.appointments?.sort(
+    if (appointmentsData?.appointments) {
+      const sortedAppointments = appointmentsData?.appointments?.sort(
         (a: any, b: any) =>
           new Date(a?.dateTime).getTime() - new Date(b?.dateTime).getTime()
       );
@@ -44,7 +44,7 @@ export default function UserAppointments() {
         )
       );
     }
-  }, [data]);
+  }, [appointmentsData]);
 
   const renderAppointmentTable = (appointments: any) => (
     <Table>

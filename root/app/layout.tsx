@@ -4,8 +4,6 @@ import NavBar from "@/components/NavBar";
 import Link from "next/link";
 import { Toaster } from "@/components/ui/toaster";
 import { Metadata } from "next";
-import Head from "next/head";
-import { ScissorsIcon } from "@radix-ui/react-icons";
 
 export const metadata: Metadata = {
   title: "ChechoCutzz",
@@ -51,7 +49,7 @@ export default async function RootLayout({
                 rel="noreferrer"
                 className="text-accent-foreground hover:text-accent"
               >
-                Admin Panel
+                Admin Dashboard
               </Link>
             </div>
           </div>

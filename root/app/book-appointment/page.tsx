@@ -4,7 +4,6 @@ import { fetcher } from "@/lib/fetcher";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { formatDateAndTime } from "@/lib/formatDateTime";
 import { useToast } from "@/components/ui/use-toast";
-
 import useSWR from "swr";
 import AppointmentSkeleton from "@/components/AppointmentSkeleton";
 import CalendarComponent from "@/components/Calendar";
@@ -33,6 +32,8 @@ export default function BookAppointment() {
   const { data, mutate } = useSWR("/api/appointments", fetcher);
   const { toast } = useToast();
 
+  const currentPrice = "25";
+
   const bookAppointment = async (appointment: any) => {
     const updatedData = {
       id: appointment?.id,
@@ -41,7 +42,6 @@ export default function BookAppointment() {
       lastName: user?.family_name,
       dateTime: appointment?.dateTime,
       clientEmail: user?.email,
-      price: appointment?.price,
       status: "booked",
     };
 
@@ -111,8 +111,9 @@ export default function BookAppointment() {
     <div>
       <h1 className="text-4xl italic font-bold mb-5">Book an Appointment</h1>
       <div className="mb-5">
-        <h2 className="text-xl underline underline-offset-2">Prices:</h2>
-        <div>Haircut - ${data?.appointments?.price}</div>
+        <h2 className="text-lg">
+          Haircut Price - ${isLoading ? "..." : currentPrice}
+        </h2>
       </div>
       <div className="flex flex-col md:flex-row">
         <div className="mb-4 md:mb-0 md:mr-4 rounded-md border shadow">

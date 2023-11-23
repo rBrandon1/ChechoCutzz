@@ -14,7 +14,6 @@ import {
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 export default function CreateAppointments() {
@@ -27,7 +26,6 @@ export default function CreateAppointments() {
     lastName: "",
     clientEmail: "",
     userId: "",
-    price: "",
     status: "available",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -93,7 +91,6 @@ export default function CreateAppointments() {
         lastName: "",
         clientEmail: "",
         userId: "",
-        price: "",
         status: "available",
       });
     } catch (error: any) {

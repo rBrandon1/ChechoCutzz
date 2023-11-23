@@ -31,7 +31,6 @@ export async function GET(req: NextRequest) {
         firstName: true,
         lastName: true,
         dateTime: true,
-        price: true,
         status: true,
       },
     });
@@ -57,15 +56,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
     }
     const body: any = await req.json();
-    const {
-      dateTime,
-      firstName,
-      lastName,
-      clientEmail,
-      userId,
-      price,
-      status,
-    } = body;
+    const { dateTime, firstName, lastName, clientEmail, userId, status } = body;
 
     const existingAppointment = await prisma.appointment.findFirst({
       where: {
@@ -89,7 +80,6 @@ export async function POST(req: NextRequest) {
         lastName,
         clientEmail,
         userId,
-        price,
         status,
       },
     });
@@ -111,16 +101,23 @@ export async function PUT(req: NextRequest) {
   }
 
   const body: any = await req.json();
-  const { id, ...updatedData } = body;
+  const { id, dateTime, firstName, lastName, clientEmail, userId, status } =
+    body;
 
   if (!id) {
     return NextResponse.json({ statusText: "Missing id", statusCode: 400 });
   }
-  console.log("UPDATED DATA", updatedData);
 
   const updatedAppointment = await prisma.appointment.update({
     where: { id },
-    data: updatedData,
+    data: {
+      dateTime: new Date(dateTime),
+      firstName,
+      lastName,
+      clientEmail,
+      userId,
+      status,
+    },
   });
 
   const transporter = nodemailer.createTransport({
@@ -133,31 +130,25 @@ export async function PUT(req: NextRequest) {
     },
   });
 
-  const clientEmailContent = render(
-    EmailConfirmation(updatedData?.firstName, updatedData?.dateTime)
-  );
+  const clientEmailContent = render(EmailConfirmation(firstName, dateTime));
   const clientMailOptions = {
     from: process.env.ZOHO_EMAIL,
-    to: updatedData?.clientEmail,
+    to: clientEmail,
     subject: "Appointment Confirmation",
     html: clientEmailContent,
   };
 
   const adminEmailContent = render(
-    AdminConfirmEmail(
-      updatedData?.firstName,
-      updatedData?.dateTime,
-      updatedData?.clientEmail
-    )
+    AdminConfirmEmail(firstName, dateTime, clientEmail)
   );
   const adminMailOptions = {
     from: process.env.ZOHO_EMAIL,
-    to: "ramirezbrandon077@gmail.com",
+    to: process.env.ZOHO_EMAIL,
     subject: "Appointment Confirmation",
     html: adminEmailContent,
   };
 
-  if (!updatedData?.dateTime) {
+  if (!dateTime) {
     throw new Error("Missing dateTime");
   }
 
@@ -231,7 +222,7 @@ export async function DELETE(req: NextRequest) {
     );
     const adminMailOptions = {
       from: process.env.ZOHO_EMAIL,
-      to: "ramirezbrandon077@gmail.com",
+      to: process.env.ZOHO_EMAIL,
       subject: "Deleted Email",
       html: adminEmailContent,
     };
