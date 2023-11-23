@@ -32,7 +32,7 @@ export default function BookAppointment() {
   const { data, mutate } = useSWR("/api/appointments", fetcher);
   const { toast } = useToast();
 
-  const currentPrice = "25";
+  const currentPrice = "30";
 
   const bookAppointment = async (appointment: any) => {
     const updatedData = {
