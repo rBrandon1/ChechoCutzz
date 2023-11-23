@@ -159,19 +159,8 @@ export async function PUT(req: NextRequest) {
     throw new Error("Missing dateTime");
   }
 
-  transporter.sendMail(clientMailOptions, (error, info) => {
-    if (error) {
-      console.log("Email Error: ", error);
-    }
-    console.log("Email sent: ", info.response);
-  });
-
-  transporter.sendMail(adminMailOptions, (error, info) => {
-    if (error) {
-      console.log("Email Error: ", error);
-    }
-    console.log("Email sent: ", info.response);
-  });
+  await transporter.sendMail(clientMailOptions);
+  await transporter.sendMail(adminMailOptions);
 
   return NextResponse.json({
     updatedAppointment,
@@ -234,19 +223,8 @@ export async function DELETE(req: NextRequest) {
       html: adminEmailContent,
     };
 
-    transporter.sendMail(clientMailOptions, (error, info) => {
-      if (error) {
-        console.log("Email Error: ", error);
-      }
-      console.log("Email sent: ", info.response);
-    });
-
-    transporter.sendMail(adminMailOptions, (error, info) => {
-      if (error) {
-        console.log("Email Error: ", error);
-      }
-      console.log("Email sent: ", info.response);
-    });
+    await transporter.sendMail(clientMailOptions);
+    await transporter.sendMail(adminMailOptions);
   }
 
   await prisma.appointment.delete({ where: { id } });

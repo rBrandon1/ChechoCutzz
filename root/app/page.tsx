@@ -22,7 +22,7 @@ export default function Home() {
       if (!res.ok) throw new Error("Failed to create data.");
       return await res.json();
     } catch (e) {
-      return console.log("Error" + e);
+      throw new Error("Error" + e);
     }
   };
 
