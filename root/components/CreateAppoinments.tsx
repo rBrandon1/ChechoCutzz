@@ -15,6 +15,7 @@ import {
   AlertDialogDescription,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { formatDateAndTime } from "@/lib/formatDateTime";
 
 export default function CreateAppointments() {
   const { mutate } = useSWR("/api/appointments", fetcher);
@@ -113,6 +114,10 @@ export default function CreateAppointments() {
     await handleSubmit();
   };
 
+  const dateTime = formData?.date + "T" + formData?.time + ":00.000";
+
+  const { dateString, timeString } = formatDateAndTime(dateTime);
+
   return (
     <div className="max-w-md mx-auto bg-transparent p-6 rounded-lg shadow-md">
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -122,7 +127,14 @@ export default function CreateAppointments() {
             <div className="inline">
               <div>Booking the following appointment: </div>
               <div>
-                Date: {formData?.date}, Time: {formData?.time}
+                Date:{" "}
+                <span className="font-bold tracking-widest text-primary">
+                  {dateString}
+                </span>
+                , Time:{" "}
+                <span className="font-bold tracking-widest text-primary">
+                  {timeString}
+                </span>
               </div>
             </div>
           </AlertDialogDescription>

@@ -128,7 +128,7 @@ export default function AdminDashboard() {
                       {isBooked ? "Booked" : "Available"}
                     </TableCell>
                     <TableCell>
-                      {isBooked && (
+                      {isBooked ? (
                         <Popover>
                           <PopoverTrigger className="underline underline-offset-2">
                             {appointment?.user?.firstName}
@@ -150,9 +150,12 @@ export default function AdminDashboard() {
                                   </AlertDialogTitle>
                                   <AlertDialogDescription>
                                     Are you sure you want to delete this
-                                    appoinment? This action cannot be undone. An
-                                    email will be sent to the client about the
-                                    deletion.
+                                    appoinment? An email will be sent to the
+                                    client about the deletion.
+                                    <br />
+                                    <span className="text-red-500">
+                                      This action cannot be undone.
+                                    </span>
                                   </AlertDialogDescription>
                                   <AlertDialogCancel asChild>
                                     <Button size="sm" className="text-primary">
@@ -173,6 +176,38 @@ export default function AdminDashboard() {
                             </div>
                           </PopoverContent>
                         </Popover>
+                      ) : (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button>Delete</Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogTitle>
+                              Confirm deletion
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this appoinment?
+                              <br />
+                              <span className="text-red-500">
+                                This action cannot be undone.
+                              </span>
+                            </AlertDialogDescription>
+                            <AlertDialogCancel asChild>
+                              <Button size="sm" className="text-primary">
+                                Cancel
+                              </Button>
+                            </AlertDialogCancel>
+                            <AlertDialogAction asChild>
+                              <Button
+                                onClick={() => {
+                                  handleDeleteAppointment(appointment);
+                                }}
+                              >
+                                Confirm
+                              </Button>
+                            </AlertDialogAction>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       )}
                     </TableCell>
                   </TableRow>

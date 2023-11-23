@@ -9,6 +9,14 @@ export const metadata: Metadata = {
   title: "ChechoCutzz",
   description:
     "Website for booking haircuts with Sergio, a barber in Canby, OR.",
+  icons: ["/barber.png"],
+  appleWebApp: {
+    title: "ChechoCutzz",
+    startupImage: "/barber.png",
+  },
+  creator: "Brandon Ramirez",
+  keywords: ["barber", "haircut", "oregon", "salon"],
+  applicationName: "ChechoCutzz",
 };
 export const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -23,14 +31,12 @@ export default async function RootLayout({
   return (
     <html lang="en" className={playfair.className}>
       <body className="flex flex-col min-h-screen bg-background">
-        <link rel="icon" type="image/icon" href="/barber.png" />
-
         <NavBar />
         <div className="mx-6 mt-6 tracking-wider text-[16px]">
           <main className="flex-grow">{children}</main>
           <Toaster />
         </div>
-        <footer className="border-t my-8 p-4 w-full text-center">
+        <footer className="border-t my-6 p-4 w-full text-center">
           <div className="grid grid-flow-col divide-x mx-auto items-center">
             <div>
               <Link

@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const accessToken: any = await getAccessToken();
     let appointments;
 
-    if (accessToken?.permissions != "admin") {
+    if (!accessToken?.permissions?.includes("admin")) {
       appointments = await prisma.appointment.findMany({
         where: { status: "available" },
         select: {
@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
     let query = {};
     if (userId) query = { where: { userId } };
     appointments = await prisma.appointment.findMany({
+      ...query,
       select: {
         id: true,
         dateTime: true,
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
   try {
     const { getAccessToken } = getKindeServerSession();
     const accessToken: any = await getAccessToken();
-    if (accessToken?.permissions != "admin") {
+    if (!accessToken?.permissions?.includes("admin")) {
       return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
     }
     const body: any = await req.json();
@@ -103,7 +104,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   const { getAccessToken } = getKindeServerSession();
   const accessToken: any = await getAccessToken();
-  if (accessToken?.permissions != "admin") {
+  if (!accessToken?.permissions?.includes("admin")) {
     return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
   }
 
@@ -173,28 +174,30 @@ export async function DELETE(req: NextRequest) {
   const { getAccessToken } = getKindeServerSession();
   const accessToken: any = await getAccessToken();
 
-  if (!accessToken || accessToken?.permissions !== "admin") {
+  if (!accessToken?.permissions?.includes("admin")) {
     return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
   }
 
   const body: any = await req.json();
   const { id, dateTime, clientEmail, firstName } = body;
 
-  if (!id)
+  if (!id) {
+    console.log("Missing id");
     return NextResponse.json({ statusText: "Missing id", statusCode: 400 });
-
+  }
   const appointmentToDelete = await prisma.appointment.findUnique({
     where: { id },
   });
 
   if (!appointmentToDelete) {
+    console.log("Appointment not found");
     return NextResponse.json({
       statusText: "Appointment not found",
       statusCode: 404,
     });
   }
 
-  if (clientEmail && firstName) {
+  if (clientEmail !== "" && firstName !== "") {
     const transporter = nodemailer.createTransport({
       host: "smtp.zoho.com",
       port: 587,
@@ -206,16 +209,16 @@ export async function DELETE(req: NextRequest) {
     });
 
     const clientEmailContent = render(EmailDeletion(firstName, dateTime));
+    const adminEmailContent = render(
+      AdminDeleteEmail(firstName, dateTime, clientEmail)
+    );
+
     const clientMailOptions = {
       from: process.env.ZOHO_EMAIL,
       to: clientEmail,
       subject: "Deleted Email",
       html: clientEmailContent,
     };
-
-    const adminEmailContent = render(
-      AdminDeleteEmail(firstName, dateTime, clientEmail)
-    );
     const adminMailOptions = {
       from: process.env.ZOHO_EMAIL,
       to: process.env.ZOHO_EMAIL,

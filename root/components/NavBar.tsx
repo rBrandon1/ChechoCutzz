@@ -59,9 +59,7 @@ export default function NavBar() {
               <ul className="grid gap-3 p-4 w-full ">
                 <li>
                   <NavigationMenuLink asChild>
-                    <Link href="/appointments" target="_blank" rel="noreferrer">
-                      Appointments
-                    </Link>
+                    <Link href="/appointments">Appointments</Link>
                   </NavigationMenuLink>
                 </li>
                 <LogoutLink className="p-1 text-destructive rounded-md">

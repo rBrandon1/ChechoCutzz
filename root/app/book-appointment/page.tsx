@@ -162,7 +162,14 @@ export default function BookAppointment() {
                                   this appointment:
                                 </div>
                                 <div>
-                                  Date: {dateString}, Time: {timeString}
+                                  Date:{" "}
+                                  <span className="font-bold tracking-widest text-primary">
+                                    {dateString}
+                                  </span>
+                                  , Time:{" "}
+                                  <span className="font-bold tracking-widest text-primary">
+                                    {timeString}
+                                  </span>
                                 </div>
                               </div>
                             </AlertDialogDescription>

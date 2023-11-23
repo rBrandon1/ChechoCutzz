@@ -7,6 +7,12 @@ import { Button } from "@/components/ui/button";
 import { InstagramLogoIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/autoplay";
+
 export default function Home() {
   const { user, permissions } = useKindeBrowserClient();
 
@@ -39,6 +45,8 @@ export default function Home() {
     }
   }, [user, permissions]);
 
+  const Images: number[] = [1, 2, 3, 4, 5, 6];
+
   return (
     <div>
       <div className="h-[400px] flex flex-col justify-center items-center text-center bg-gradient-to-r from-[#141E30]/75 to-[#243B55]/75 shadow-2xl shadow-[#243B55] rounded-md ">
@@ -46,13 +54,13 @@ export default function Home() {
           <h1>Welcome to Checho Cutzz</h1>
         </div>
         <div className="mt-5 flex justify-center">
-          <Button asChild className="w-72">
+          <Button asChild className="w-fit">
             <Link href="/book-appointment">Book now</Link>
           </Button>
         </div>
       </div>
 
-      <div className="mt-32">
+      <div className="mt-32 mb-14 md:mb-0">
         <div className="font-bold text-4xl mb-5">
           <span className="flex items-center">
             <h1 className="italic">Gallery</h1>
@@ -66,36 +74,54 @@ export default function Home() {
             </a>
           </span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="w-full h-auto max-w-md mx-auto">
-            <img
-              src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(73).webp"
-              alt="Description"
-              className="object-contain w-full h-full rounded-md"
-            />
-          </div>
-          <div className="w-full h-auto max-w-md mx-auto">
-            <img
-              src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(75).webp"
-              alt="Description"
-              className="object-contain w-full h-full rounded-md"
-            />
-          </div>
-          <div className="w-full h-auto max-w-md mx-auto">
-            <img
-              src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(70).webp"
-              alt="Description"
-              className="object-contain w-full h-full rounded-md"
-            />
-          </div>
-          <div className="w-full h-auto max-w-md mx-auto">
-            <img
-              src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(76).webp"
-              alt="Description"
-              className="object-contain w-full h-full rounded-md"
-            />
-          </div>
-        </div>
+        <Swiper
+          className="mySwiper"
+          autoplay={{
+            delay: 2500,
+            disableOnInteraction: false,
+          }}
+          loop={true}
+          speed={1000}
+          centeredSlides={true}
+          modules={[Pagination, Autoplay]}
+          spaceBetween={30}
+          pagination={{
+            clickable: true,
+            bulletActiveClass: "swiper-pagination-bullet-active",
+            bulletClass: "swiper-pagination-bullet",
+            modifierClass: "swiper-pagination-",
+          }}
+          breakpoints={{
+            640: {
+              slidesPerView: 3,
+              spaceBetween: 10,
+            },
+            0: {
+              slidesPerView: 2,
+              spaceBetween: -50,
+            },
+          }}
+        >
+          {Images.map((imageNumber) => (
+            <SwiperSlide
+              key={imageNumber}
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              className="swiper-slide"
+            >
+              <Image
+                src={`/imgs/${imageNumber}.png`}
+                alt={`Galary Image ${imageNumber}`}
+                width={1300}
+                height={1500}
+                className="h-60 md:h-96 lg:h-[32rem] rounded-lg object-cover"
+              />
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
     </div>
   );
