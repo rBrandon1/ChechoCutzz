@@ -182,7 +182,6 @@ export async function DELETE(req: NextRequest) {
   const { id, dateTime, clientEmail, firstName } = body;
 
   if (!id) {
-    console.log("Missing id");
     return NextResponse.json({ statusText: "Missing id", statusCode: 400 });
   }
   const appointmentToDelete = await prisma.appointment.findUnique({
@@ -190,7 +189,6 @@ export async function DELETE(req: NextRequest) {
   });
 
   if (!appointmentToDelete) {
-    console.log("Appointment not found");
     return NextResponse.json({
       statusText: "Appointment not found",
       statusCode: 404,
