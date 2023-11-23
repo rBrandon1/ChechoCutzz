@@ -47,9 +47,7 @@ export default function Home() {
         </div>
         <div className="mt-5 flex justify-center">
           <Button asChild className="w-72">
-            <Link href="/book-appointment" target="_blank" rel="noreferrer">
-              Book now
-            </Link>
+            <Link href="/book-appointment">Book now</Link>
           </Button>
         </div>
       </div>
@@ -71,28 +69,28 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="w-full h-auto max-w-md mx-auto">
             <img
-              src="https://picsum.photos/200"
+              src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(73).webp"
               alt="Description"
               className="object-contain w-full h-full rounded-md"
             />
           </div>
           <div className="w-full h-auto max-w-md mx-auto">
             <img
-              src="https://picsum.photos/200"
+              src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(75).webp"
               alt="Description"
               className="object-contain w-full h-full rounded-md"
             />
           </div>
           <div className="w-full h-auto max-w-md mx-auto">
             <img
-              src="https://picsum.photos/200"
+              src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(70).webp"
               alt="Description"
               className="object-contain w-full h-full rounded-md"
             />
           </div>
           <div className="w-full h-auto max-w-md mx-auto">
             <img
-              src="https://picsum.photos/200"
+              src="https://tecdn.b-cdn.net/img/Photos/Horizontal/Nature/4-col/img%20(76).webp"
               alt="Description"
               className="object-contain w-full h-full rounded-md"
             />
