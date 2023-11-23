@@ -10,27 +10,34 @@ import AdminDeleteEmail from "@/components/AdminDeleteEmail";
 
 export async function GET(req: NextRequest) {
   try {
-    // const { getAccessToken } = getKindeServerSession();
-    // const accessToken: any = await getAccessToken();
-    // if (accessToken?.permissions != "admin") {
-    //   return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
-    // }
+    const { getAccessToken } = getKindeServerSession();
+    const accessToken: any = await getAccessToken();
+    let appointments;
+
+    if (accessToken?.permissions != "admin") {
+      appointments = await prisma.appointment.findMany({
+        where: { status: "available" },
+        select: {
+          id: true,
+          dateTime: true,
+          status: true,
+        },
+      });
+    }
 
     const { searchParams } = new URL(req.nextUrl);
     const userId = searchParams.get("userId");
-
     let query = {};
     if (userId) query = { where: { userId } };
-    const appointments = await prisma.appointment.findMany({
-      ...query,
+    appointments = await prisma.appointment.findMany({
       select: {
         id: true,
-        userId: true,
-        user: true,
-        clientEmail: true,
+        dateTime: true,
         firstName: true,
         lastName: true,
-        dateTime: true,
+        clientEmail: true,
+        userId: true,
+        user: true,
         status: true,
       },
     });
