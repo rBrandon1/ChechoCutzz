@@ -27,6 +27,7 @@ export default function CreateAppointments() {
     lastName: "",
     clientEmail: "",
     userId: "",
+    price: "",
     status: "available",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,7 +40,7 @@ export default function CreateAppointments() {
         userId: user?.id as string,
       }));
     }
-  }, [user, formData.userId]);
+  }, [user, formData?.userId]);
 
   const handleChange = (e: any) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -92,6 +93,7 @@ export default function CreateAppointments() {
         lastName: "",
         clientEmail: "",
         userId: "",
+        price: "",
         status: "available",
       });
     } catch (error: any) {

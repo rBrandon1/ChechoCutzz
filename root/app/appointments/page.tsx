@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { formatDateAndTime } from "@/lib/formatDateTime";
+import AppointmentSkeleton from "@/components/AppointmentSkeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -17,7 +18,7 @@ import Link from "next/link";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 
 export default function UserAppointments() {
-  const { user } = useKindeBrowserClient();
+  const { user, isLoading } = useKindeBrowserClient();
   const { data } = useSWR(
     user ? `/api/appointments?userId=${user?.id}` : null,
     fetcher
@@ -81,7 +82,9 @@ export default function UserAppointments() {
             <TabsTrigger value="previous">Previous</TabsTrigger>
           </TabsList>
           <TabsContent value="upcoming">
-            {upcomingAppointments?.length > 0 ? (
+            {isLoading ? (
+              <AppointmentSkeleton />
+            ) : upcomingAppointments?.length > 0 ? (
               renderAppointmentTable(upcomingAppointments)
             ) : (
               <div>

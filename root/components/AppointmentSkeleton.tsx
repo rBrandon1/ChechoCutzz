@@ -31,7 +31,7 @@ export default function AppointmentSkeleton() {
                 <Skeleton className="h-[30px] w-[100px] md:w-[250px]" />
               </td>
               <td>
-                <Button className="h-[30px] w-[65px]" />
+                <Skeleton className="h-[30px] w-[100px] md:w-[250px]" />
               </td>
             </TableRow>
           ))}

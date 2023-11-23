@@ -30,9 +30,7 @@ import { useState } from "react";
 
 export default function BookAppointment() {
   const { user, isLoading, isAuthenticated } = useKindeBrowserClient();
-
   const { data, mutate } = useSWR("/api/appointments", fetcher);
-
   const { toast } = useToast();
 
   const bookAppointment = async (appointment: any) => {
@@ -43,6 +41,7 @@ export default function BookAppointment() {
       lastName: user?.family_name,
       dateTime: appointment?.dateTime,
       clientEmail: user?.email,
+      price: appointment?.price,
       status: "booked",
     };
 
@@ -111,6 +110,10 @@ export default function BookAppointment() {
   return (
     <div>
       <h1 className="text-4xl italic font-bold mb-5">Book an Appointment</h1>
+      <div className="mb-5">
+        <h2 className="text-xl underline underline-offset-2">Prices:</h2>
+        <div>Haircut - ${data?.appointments?.price}</div>
+      </div>
       <div className="flex flex-col md:flex-row">
         <div className="mb-4 md:mb-0 md:mr-4 rounded-md border shadow">
           <CalendarComponent
