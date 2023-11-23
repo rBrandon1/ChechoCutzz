@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { Button } from "@/components/ui/button";
 import { InstagramLogoIcon } from "@radix-ui/react-icons";
-import Image from "next/image";
+// import Image from "next/image";
 
 export default function Home() {
   const { user, permissions } = useKindeBrowserClient();
