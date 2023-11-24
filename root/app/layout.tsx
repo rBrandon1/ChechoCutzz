@@ -22,7 +22,8 @@ export const metadata: Metadata = {
     url: "https://chechocutzz.com",
     description:
       "Website for booking haircuts with Sergio, a barber in Canby, OR.",
-    images: ["/barber.png"],
+    images: ["/opengraph-image.png"],
+
     type: "website",
   },
 };
