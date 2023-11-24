@@ -61,7 +61,7 @@ export default function Home() {
           <h1>Welcome to Checho Cutzz</h1>
         </div>
         <div className="mt-5 flex justify-center">
-          <Button asChild className="w-fit">
+          <Button asChild className="flex items-center">
             <Link href="/book-appointment">Book now</Link>
           </Button>
         </div>
