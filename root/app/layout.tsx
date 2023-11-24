@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     title: "ChechoCutzz",
     url: "https://chechocutzz.com",
     description:
-      "Website for booking haircuts with Sergio, a barber in Canby, OR.",
+      "Book your next today with Sergio, using the ChechoCutzz website",
     images: ["https://chechocutzz.com/opengraph-image.png"],
     type: "website",
   },
