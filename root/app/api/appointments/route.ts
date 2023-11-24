@@ -16,7 +16,10 @@ export async function GET(req: NextRequest) {
 
     if (!accessToken?.permissions?.includes("admin")) {
       appointments = await prisma.appointment.findMany({
-        where: { status: "available" },
+        where: {
+          userId: accessToken?.sub,
+          status: "booked",
+        },
         select: {
           id: true,
           dateTime: true,
@@ -24,11 +27,9 @@ export async function GET(req: NextRequest) {
         },
       });
     }
-
     const { searchParams } = new URL(req.nextUrl);
     const userId = searchParams.get("userId");
-    let query = {};
-    if (userId) query = { where: { userId } };
+    let query = userId && { where: { userId } };
     appointments = await prisma.appointment.findMany({
       ...query,
       select: {
@@ -42,7 +43,6 @@ export async function GET(req: NextRequest) {
         status: true,
       },
     });
-
     return NextResponse.json({
       appointments,
       statusText: "OK",
@@ -102,72 +102,97 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  const { getAccessToken } = getKindeServerSession();
-  const accessToken: any = await getAccessToken();
-  if (!accessToken?.permissions?.includes("admin")) {
-    return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
+  try {
+    const { getAccessToken } = getKindeServerSession();
+    const accessToken: any = await getAccessToken();
+    const body: any = await req.json();
+    const { id, dateTime, firstName, lastName, clientEmail, userId, status } =
+      body;
+
+    if (!accessToken?.permissions?.includes("admin")) {
+      if (status !== "booked") {
+        return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
+      }
+
+      const updatedAppointment = await prisma.appointment.update({
+        where: { id },
+        data: {
+          userId,
+          firstName,
+          lastName,
+          clientEmail,
+          status,
+        },
+      });
+
+      const transporter = nodemailer.createTransport({
+        host: "smtp.zoho.com",
+        port: 587,
+        secure: false,
+        auth: {
+          user: process.env.ZOHO_EMAIL,
+          pass: process.env.ZOHO_PASSWORD,
+        },
+      });
+
+      const clientEmailContent = render(EmailConfirmation(firstName, dateTime));
+      const clientMailOptions = {
+        from: process.env.ZOHO_EMAIL,
+        to: clientEmail,
+        subject: "Appointment Confirmation",
+        html: clientEmailContent,
+      };
+
+      const adminEmailContent = render(
+        AdminConfirmEmail(firstName, dateTime, clientEmail)
+      );
+      const adminMailOptions = {
+        from: process.env.ZOHO_EMAIL,
+        to: process.env.ZOHO_EMAIL,
+        subject: "Appointment Confirmation",
+        html: adminEmailContent,
+      };
+
+      if (!dateTime) {
+        throw new Error("Missing dateTime");
+      }
+
+      await Promise.all([
+        transporter.sendMail(clientMailOptions),
+        transporter.sendMail(adminMailOptions),
+      ]);
+
+      return NextResponse.json({
+        updatedAppointment,
+        statusText: "Appointment booked",
+        statusCode: 200,
+      });
+    }
+
+    if (!id) {
+      return NextResponse.json({ statusText: "Missing id", statusCode: 400 });
+    }
+
+    const updatedAppointment = await prisma.appointment.update({
+      where: { id },
+      data: {
+        dateTime: new Date(dateTime),
+        firstName,
+        lastName,
+        clientEmail,
+        userId,
+        status,
+      },
+    });
+
+    return NextResponse.json({
+      updatedAppointment,
+      statusText: "Appointment updated",
+      statusCode: 200,
+    });
+  } catch (e: any) {
+    return NextResponse.json({ statusText: e.message, statusCode: 500 });
   }
-
-  const body: any = await req.json();
-  const { id, dateTime, firstName, lastName, clientEmail, userId, status } =
-    body;
-
-  if (!id) {
-    return NextResponse.json({ statusText: "Missing id", statusCode: 400 });
-  }
-
-  const updatedAppointment = await prisma.appointment.update({
-    where: { id },
-    data: {
-      dateTime: new Date(dateTime),
-      firstName,
-      lastName,
-      clientEmail,
-      userId,
-      status,
-    },
-  });
-
-  const transporter = nodemailer.createTransport({
-    host: "smtp.zoho.com",
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.ZOHO_EMAIL,
-      pass: process.env.ZOHO_PASSWORD,
-    },
-  });
-
-  const clientEmailContent = render(EmailConfirmation(firstName, dateTime));
-  const clientMailOptions = {
-    from: process.env.ZOHO_EMAIL,
-    to: clientEmail,
-    subject: "Appointment Confirmation",
-    html: clientEmailContent,
-  };
-
-  const adminEmailContent = render(
-    AdminConfirmEmail(firstName, dateTime, clientEmail)
-  );
-  const adminMailOptions = {
-    from: process.env.ZOHO_EMAIL,
-    to: process.env.ZOHO_EMAIL,
-    subject: "Appointment Confirmation",
-    html: adminEmailContent,
-  };
-
-  if (!dateTime) {
-    throw new Error("Missing dateTime");
-  }
-
-  await transporter.sendMail(clientMailOptions);
-  await transporter.sendMail(adminMailOptions);
-
-  return NextResponse.json({
-    updatedAppointment,
-    statusText: "Created",
-    statusCode: 201,
-  });
 }
 
 export async function DELETE(req: NextRequest) {

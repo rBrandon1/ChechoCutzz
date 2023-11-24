@@ -75,7 +75,6 @@ export default function Home() {
           </span>
         </div>
         <Swiper
-          className="mySwiper"
           autoplay={{
             delay: 2500,
             disableOnInteraction: false,
@@ -89,7 +88,6 @@ export default function Home() {
             clickable: true,
             bulletActiveClass: "swiper-pagination-bullet-active",
             bulletClass: "swiper-pagination-bullet",
-            modifierClass: "swiper-pagination-",
           }}
           breakpoints={{
             640: {
@@ -101,6 +99,27 @@ export default function Home() {
               spaceBetween: -50,
             },
           }}
+          onInit={(swiper) => {
+            swiper.slides.forEach((slide) => {
+              slide.style.height = "100%";
+              slide.style.transition =
+                "transform 0.3s, opacity 0.3s ease-in-out";
+            });
+          }}
+          onActiveIndexChange={(swiper) => {
+            const activeSlide = swiper.slides[swiper.activeIndex];
+            activeSlide.style.transform = "scale(1)";
+            activeSlide.style.opacity = "1";
+            activeSlide.style.zIndex = "1";
+
+            swiper.slides.forEach((slide, index) => {
+              if (index !== swiper.activeIndex) {
+                slide.style.transform = "scale(0.9)";
+                slide.style.opacity = "0.3";
+                slide.style.zIndex = "0";
+              }
+            });
+          }}
         >
           {Images.map((imageNumber) => (
             <SwiperSlide
@@ -110,9 +129,9 @@ export default function Home() {
                 justifyContent: "center",
                 alignItems: "center",
               }}
-              className="swiper-slide"
             >
               <Image
+                priority
                 src={`/imgs/${imageNumber}.png`}
                 alt={`Galary Image ${imageNumber}`}
                 width={1300}

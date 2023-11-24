@@ -52,7 +52,7 @@ export default function NavBar() {
             <NavigationMenuTrigger>
               <Avatar>
                 <AvatarImage src={user?.picture as string} />
-                <AvatarFallback>{user?.picture?.slice(0, 2)}</AvatarFallback>
+                <AvatarFallback>{user?.given_name?.slice(0, 2)}</AvatarFallback>
               </Avatar>
             </NavigationMenuTrigger>
             <NavigationMenuContent>
