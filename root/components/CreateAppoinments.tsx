@@ -193,7 +193,11 @@ export default function CreateAppointments() {
         </div>
       </div>
       <div className="flex justify-center">
-        <Button onClick={openDialog} disabled={isSubmitting}>
+        <Button
+          onClick={openDialog}
+          disabled={isSubmitting}
+          className="flex items-center"
+        >
           Create Appointment
         </Button>
       </div>
