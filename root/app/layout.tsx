@@ -4,7 +4,7 @@ import NavBar from "@/components/NavBar";
 import Link from "next/link";
 import { Toaster } from "@/components/ui/toaster";
 import { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/react";
+import Head from "next/head";
 
 export const metadata: Metadata = {
   title: "ChechoCutzz",
@@ -40,6 +40,42 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="en" className={playfair.className}>
+      <Head>
+        <title>ChechoCutzz</title>
+        <meta
+          name="Website for booking haircuts with Sergio, a barber in Canby, OR."
+          content="Landing page for ChechoCutzz"
+        />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://chechocutzz.com" />
+        <meta property="og:title" content="ChechoCutzz" />
+        <meta
+          property="og:description"
+          content="Book your next haircut with Sergio, a barber in Canby, OR."
+        />
+        <meta
+          property="og:image"
+          content="https://chechocutzz.com/opengraph-image.png"
+        />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta
+          property="twitter:url"
+          content="https://chechocutzz.com/opengraph-image.png"
+        />
+        <meta property="twitter:title" content="ChechoCutzz" />
+        <meta
+          property="twitter:description"
+          content="Book your next haircut with Sergio, a barber in Canby, OR."
+        />
+        <meta
+          property="twitter:image"
+          content="https://chechocutzz.com/opengraph-image.png"
+        />
+      </Head>
       <body className="flex flex-col min-h-screen bg-background">
         <NavBar />
         <div className="mx-6 mt-6 tracking-wider text-[18px]">
@@ -70,7 +106,6 @@ export default async function RootLayout({
             </div>
           </div>
         </footer>
-        <Analytics />
       </body>
     </html>
   );
