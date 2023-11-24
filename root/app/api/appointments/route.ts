@@ -151,7 +151,7 @@ export async function PUT(req: NextRequest) {
       };
       const adminMailOptions = {
         from: process.env.ZOHO_EMAIL,
-        to: process.env.ZOHO_EMAIL,
+        to: process.env.SERGIO_EMAIL,
         subject: "Appointment Confirmation",
         html: adminEmailContent,
       };
@@ -251,7 +251,7 @@ export async function DELETE(req: NextRequest) {
   };
   const adminMailOptions = {
     from: process.env.ZOHO_EMAIL,
-    to: process.env.ZOHO_EMAIL,
+    to: process.env.SERGIO_EMAIL,
     subject: "Appoinment Deleted",
     html: adminEmailContent,
   };

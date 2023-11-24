@@ -24,7 +24,7 @@ export default function NavBar() {
 
   return (
     <NavigationMenu>
-      <NavigationMenuList className="flex justify-between items-center">
+      <NavigationMenuList className="flex justify-between mx-0 md:mx-8 items-center">
         <div className="flex">
           <h1 className="text-xl font-bold pr-4 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">
             <Link href="/">ChechoCutzz</Link>

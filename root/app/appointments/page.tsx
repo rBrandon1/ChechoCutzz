@@ -87,18 +87,7 @@ export default function UserAppointments() {
             ) : upcomingAppointments?.length > 0 ? (
               renderAppointmentTable(upcomingAppointments)
             ) : (
-              <div>
-                <div>No upcoming appointments.</div>
-                <div>
-                  Book your next appointment{" "}
-                  <Link
-                    href="/book-appointment"
-                    className="font-bold text-muted-foreground underline underline-offset-2"
-                  >
-                    here
-                  </Link>
-                </div>
-              </div>
+              <div>No upcoming appointments.</div>
             )}
           </TabsContent>
           <TabsContent value="previous">
@@ -107,19 +96,19 @@ export default function UserAppointments() {
             ) : (
               <div>
                 <div>No previous appointments.</div>
-                <div>
-                  Book your next appointment{" "}
-                  <Link
-                    href="/book-appointment"
-                    className="font-bold text-muted-foreground underline underline-offset-2"
-                  >
-                    here
-                  </Link>
-                </div>
               </div>
             )}
           </TabsContent>
         </Tabs>
+        <div className="mt-6 text-sm">
+          Book your next appointment{" "}
+          <Link
+            href="/book-appointment"
+            className="font-bold text-muted-foreground underline underline-offset-2"
+          >
+            here
+          </Link>
+        </div>
       </div>
     </div>
   );
