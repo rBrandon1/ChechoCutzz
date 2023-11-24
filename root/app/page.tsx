@@ -58,7 +58,7 @@ export default function Home() {
     <div>
       <div className="h-[400px] flex flex-col justify-center items-center text-center bg-gradient-to-r from-[#141E30]/75 to-[#243B55]/75 shadow-2xl shadow-[#243B55] rounded-md ">
         <div className="text-2xl md:text-4xl font-bold">
-          <h1>Welcome to Checho Cutzz</h1>
+          <h1>Welcome to ChechoCutzz</h1>
         </div>
         <div className="mt-5 flex justify-center">
           <Button asChild className="flex items-center">
