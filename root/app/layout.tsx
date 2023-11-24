@@ -17,7 +17,16 @@ export const metadata: Metadata = {
   creator: "Brandon Ramirez",
   keywords: ["barber", "haircut", "oregon", "salon"],
   applicationName: "ChechoCutzz",
+  openGraph: {
+    title: "ChechoCutzz",
+    url: "https://chechocutzz.com",
+    description:
+      "Website for booking haircuts with Sergio, a barber in Canby, OR.",
+    images: ["/barber.png"],
+    type: "website",
+  },
 };
+
 export const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-sans",
