@@ -1,7 +1,6 @@
 "use client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 
 export default function AppointmentSkeleton() {
   const skeletonRows = 3;

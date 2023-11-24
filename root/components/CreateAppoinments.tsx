@@ -16,6 +16,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { formatDateAndTime } from "@/lib/formatDateTime";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 export default function CreateAppointments() {
   const { mutate } = useSWR("/api/appointments", fetcher);
@@ -32,6 +34,9 @@ export default function CreateAppointments() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  const dateTime = formData?.date + "T" + formData?.time + ":00.000";
+  const { dateString, timeString } = formatDateAndTime(dateTime);
+
   useEffect(() => {
     if (user && !formData.userId) {
       setFormData((fData) => ({
@@ -41,12 +46,17 @@ export default function CreateAppointments() {
     }
   }, [user, formData?.userId]);
 
+  const validateForm = () => {
+    return formData?.date === "" || formData?.time === "" ? false : true;
+  };
+
   const handleChange = (e: any) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
+
     setIsSubmitting(true);
 
     const formattedTime = `${formData.date}T${formData.time}:00.000`;
@@ -80,7 +90,7 @@ export default function CreateAppointments() {
         toast({ description: "Creating appointment..." });
       } else {
         toast({
-          description: "Appointment created successfully!",
+          description: `Appointment created successfully for ${dateString} at ${timeString}!`,
         });
         mutate("/api/appointments");
       }
@@ -106,7 +116,16 @@ export default function CreateAppointments() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const openDialog = () => setIsDialogOpen(true);
+  const openDialog = () => {
+    if (!validateForm()) {
+      toast({
+        description: "Please select a date and time.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsDialogOpen(true);
+  };
   const closeDialog = () => setIsDialogOpen(false);
 
   const handleDialogSubmit = async () => {
@@ -114,12 +133,8 @@ export default function CreateAppointments() {
     await handleSubmit();
   };
 
-  const dateTime = formData?.date + "T" + formData?.time + ":00.000";
-
-  const { dateString, timeString } = formatDateAndTime(dateTime);
-
   return (
-    <div className="max-w-md mx-auto bg-transparent p-6 rounded-lg shadow-md">
+    <div className="max-w-md mx-auto bg-transparent pt-3 pb-6 rounded-lg shadow-md">
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <AlertDialogContent>
           <AlertDialogTitle>Creating Appointment</AlertDialogTitle>
@@ -149,36 +164,34 @@ export default function CreateAppointments() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <form onSubmit={handleSubmit} className="space-y-4 mb-5">
-        <div className="flex flex-col">
-          <label htmlFor="date" className="text-sm font-medium">
-            Date
-          </label>
-          <input
-            className="mt-1 block w-full text-primary-foreground px-3 py-2 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-            type="date"
-            id="date"
-            name="date"
-            value={formData?.date}
-            onChange={handleChange}
-            required
-          />
+      <div className="mb-6 flex justify-evenly">
+        <div className="flex justify-center mb-4">
+          <div>
+            <Label htmlFor="date">Date</Label>
+            <Input
+              id="date"
+              className="text-primary-foreground"
+              type="date"
+              value={formData?.date}
+              name="date"
+              onChange={handleChange}
+            />
+          </div>
         </div>
-        <div className="flex flex-col">
-          <label htmlFor="time" className="text-sm font-medium">
-            Time
-          </label>
-          <input
-            className="mt-1 block w-full text-primary-foreground px-3 py-2 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-            type="time"
-            id="time"
-            name="time"
-            value={formData?.time}
-            onChange={handleChange}
-            required
-          />
+        <div className="flex justify-center">
+          <div>
+            <Label htmlFor="time">Time</Label>
+            <Input
+              id="time"
+              className="text-primary-foreground"
+              type="time"
+              name="time"
+              value={formData?.time}
+              onChange={handleChange}
+            />
+          </div>
         </div>
-      </form>
+      </div>
       <div className="flex justify-center">
         <Button onClick={openDialog} disabled={isSubmitting}>
           Create Appointment

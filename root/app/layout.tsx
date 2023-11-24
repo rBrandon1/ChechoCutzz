@@ -32,7 +32,7 @@ export default async function RootLayout({
     <html lang="en" className={playfair.className}>
       <body className="flex flex-col min-h-screen bg-background">
         <NavBar />
-        <div className="mx-6 mt-6 tracking-wider text-[16px]">
+        <div className="mx-6 mt-6 tracking-wider text-[18px]">
           <main className="flex-grow">{children}</main>
           <Toaster />
         </div>
