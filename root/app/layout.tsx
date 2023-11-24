@@ -4,6 +4,7 @@ import NavBar from "@/components/NavBar";
 import Link from "next/link";
 import { Toaster } from "@/components/ui/toaster";
 import { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
   title: "ChechoCutzz",
@@ -69,6 +70,7 @@ export default async function RootLayout({
             </div>
           </div>
         </footer>
+        <Analytics />
       </body>
     </html>
   );
