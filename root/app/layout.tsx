@@ -23,7 +23,6 @@ export const metadata: Metadata = {
     description:
       "Website for booking haircuts with Sergio, a barber in Canby, OR.",
     images: ["/opengraph-image.png"],
-
     type: "website",
   },
 };
