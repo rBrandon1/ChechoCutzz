@@ -112,7 +112,7 @@ export async function PUT(req: NextRequest) {
     const { id, dateTime, firstName, lastName, clientEmail, userId, status } =
       body;
 
-    if (id) {
+    if (!accessToken.permissions.includes("admin")) {
       const updatedAppointment = await prisma.appointment.update({
         where: { id },
         data: {
