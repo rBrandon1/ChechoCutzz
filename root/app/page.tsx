@@ -13,7 +13,6 @@ import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/autoplay";
-import InstagramWarningDialog from "@/components/InstagramWarning";
 
 export default function Home() {
   const { user, permissions } = useKindeBrowserClient();
@@ -57,7 +56,6 @@ export default function Home() {
 
   return (
     <div>
-      <InstagramWarningDialog />
       <div className="h-[400px] flex flex-col justify-center items-center text-center bg-gradient-to-r from-[#141E30]/75 to-[#243B55]/75 shadow-2xl shadow-[#243B55] rounded-md ">
         <div className="text-2xl md:text-4xl font-bold">
           <h1>Welcome to ChechoCutzz</h1>

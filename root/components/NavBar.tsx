@@ -9,6 +9,16 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogHeader,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   LoginLink,
@@ -17,6 +27,8 @@ import {
 } from "@kinde-oss/kinde-auth-nextjs";
 import { Badge } from "@/components/ui/badge";
 import { roleCheck } from "@/lib/roleCheck";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { Button } from "./ui/button";
 
 export default function NavBar() {
   const { user, isAuthenticated, permissions } = useKindeBrowserClient();
@@ -40,13 +52,37 @@ export default function NavBar() {
             )}
           </div>
         </div>
-
         {!isAuthenticated ? (
-          <>
-            <LoginLink className="p-1 bg-primary text-secondary rounded-md">
-              Sign in
-            </LoginLink>
-          </>
+          <div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button className="p-1 bg-primary text-secondary rounded-md">
+                  Sign in
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle asChild>
+                    <div className="flex justify-center items-center">
+                      <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
+                      <div>Notice</div>
+                    </div>
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-start">
+                    To ensure a smooth sign-in experience, please use standard
+                    browsers like Safari or Chrome.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogAction asChild>
+                    <LoginLink className="p-1 bg-primary text-secondary rounded-md flex justify-center items-center w-full">
+                      Continue
+                    </LoginLink>
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         ) : (
           <NavigationMenuItem>
             <NavigationMenuTrigger>

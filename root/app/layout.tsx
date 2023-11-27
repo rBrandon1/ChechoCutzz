@@ -52,7 +52,7 @@ export default async function RootLayout({
                 href="https://brandnramirez.com"
                 target="_blank"
                 rel="noreferrer"
-                className="underline underline-offset-2 text-muted-foreground hover:text-accent"
+                className="underline underline-offset-[3px] text-muted-foreground hover:text-accent"
               >
                 © Brandon Ramirez {new Date().getFullYear()}
               </Link>
