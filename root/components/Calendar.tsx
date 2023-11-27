@@ -23,14 +23,27 @@ const CalendarComponent = ({
     });
   };
 
+  const isFullyBooked = (date: Date) => {
+    const dateAppointments = appointments?.filter((appointment: any) => {
+      const appointmentDate = new Date(appointment?.dateTime);
+      return appointmentDate?.toDateString() === new Date(date).toDateString();
+    });
+    return (
+      dateAppointments?.length > 0 &&
+      dateAppointments?.every(
+        (appointment: any) => appointment?.status !== "available"
+      )
+    );
+  };
+
   const availableDates = appointments
     ?.filter(
       (appointment: any) =>
         appointment?.status === "available" &&
-        !isPastDate(appointment?.dateTime)
+        !isPastDate(appointment?.dateTime) &&
+        !isFullyBooked(appointment)
     )
     .map((appointment: any) => new Date(appointment?.dateTime));
-
   const handleDaySelect = (date: any) => {
     onDateSelect(date);
   };
@@ -50,6 +63,7 @@ const CalendarComponent = ({
               !isPastDate(date?.getTime()) &&
               !isToday(date)
           ),
+        fullyBooked: (date) => userRole === "admin" && isFullyBooked(date),
         past: (date) =>
           userRole === "admin" &&
           hadAppointment(date) &&
@@ -60,11 +74,8 @@ const CalendarComponent = ({
           date?.toDateString() === selectedDate?.toDateString(),
       }}
       modifiersStyles={{
+        fullyBooked: { backgroundColor: "hsl(144.9 80.4% 10%)" },
         available: { backgroundColor: "darkgray" },
-        past: {
-          color: "hsl(var(--background))",
-          backgroundColor: "hsl(var(--secondary))",
-        },
         today: {
           backgroundColor: "slategray",
         },
@@ -73,6 +84,10 @@ const CalendarComponent = ({
           fontWeight: "bold",
           textDecoration: "underline",
           textUnderlineOffset: "3px",
+        },
+        past: {
+          color: "hsl(var(--background))",
+          backgroundColor: "hsl(var(--secondary))",
         },
       }}
     />

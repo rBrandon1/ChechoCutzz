@@ -112,11 +112,7 @@ export async function PUT(req: NextRequest) {
     const { id, dateTime, firstName, lastName, clientEmail, userId, status } =
       body;
 
-    if (!accessToken?.permissions?.includes("admin")) {
-      if (status !== "booked") {
-        return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
-      }
-
+    if (id) {
       const updatedAppointment = await prisma.appointment.update({
         where: { id },
         data: {
