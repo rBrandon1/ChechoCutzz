@@ -12,7 +12,7 @@ export default function Admin() {
         <AdminDashboard />
       </div>
       <div>
-        <h2 className="text-2xl text-center">Create an appointment</h2>
+        <h2 className="text-2xl text-center">Create appointments</h2>
         <CreateAppointments />
       </div>
     </div>

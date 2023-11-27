@@ -105,7 +105,7 @@ export default function AdminDashboard() {
           appointments={data?.appointments}
           selectedDate={selectedDate}
           onDateSelect={handleDateSelect}
-          filterMode="all"
+          userRole="admin"
         />
       </div>
 

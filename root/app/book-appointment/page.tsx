@@ -90,10 +90,14 @@ export default function BookAppointment() {
   };
   const filteredAppointments = data?.appointments
     ?.filter((appointment: any) => {
-      const appointmentDate = new Date(appointment?.dateTime).toDateString();
+      const appointmentDateTime = new Date(appointment?.dateTime).getTime();
+      const now = new Date().getTime();
+
       return (
-        appointmentDate === selectedDate?.toDateString() &&
-        appointment?.status === "available"
+        appointmentDateTime >= now &&
+        appointment?.status === "available" &&
+        new Date(appointment?.dateTime).toDateString() ===
+          selectedDate?.toDateString()
       );
     })
     .sort((a: any, b: any) => {

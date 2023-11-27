@@ -34,8 +34,19 @@ export default function CreateAppointments() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const dateTime = formData?.date + "T" + formData?.time + ":00.000";
-  const { dateString, timeString } = formatDateAndTime(dateTime);
+  const [times, setTimes] = useState([""]);
+  const addTime = () => {
+    setTimes([...times, ""]);
+  };
+  const removeTime = (index: number) => {
+    const newTimes = times.filter((_, i) => i !== index);
+    setTimes(newTimes);
+  };
+  const handleTimeChange = (time: string, index: number) => {
+    const newTimes = [...times];
+    newTimes[index] = time;
+    setTimes(newTimes);
+  };
 
   useEffect(() => {
     if (user && !formData.userId) {
@@ -47,7 +58,7 @@ export default function CreateAppointments() {
   }, [user, formData?.userId]);
 
   const validateForm = () => {
-    return formData?.date === "" || formData?.time === "" ? false : true;
+    return formData?.date !== "" && times.some((time) => time !== "");
   };
 
   const handleChange = (e: any) => {
@@ -56,62 +67,67 @@ export default function CreateAppointments() {
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-
     setIsSubmitting(true);
 
-    const formattedTime = `${formData.date}T${formData.time}:00.000`;
-    const localDateTime = moment(formattedTime);
-    const pacificDateTimeISO = localDateTime.tz("America/Los_Angeles").format();
+    for (const time of times) {
+      const formattedTime = `${formData.date}T${time}:00.000`;
+      const localDateTime = moment(formattedTime);
+      const pacificDateTimeISO = localDateTime
+        .tz("America/Los_Angeles")
+        .format();
 
-    const submissionData = {
-      ...formData,
-      dateTime: pacificDateTimeISO,
-    };
+      const submissionData = {
+        ...formData,
+        dateTime: pacificDateTimeISO,
+      };
 
-    try {
-      const res = await fetch("/api/appointments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submissionData),
-      });
+      try {
+        const res = await fetch("/api/appointments", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(submissionData),
+        });
 
-      const result = await res.json();
-      if (result.statusCode === 409) {
+        const result = await res.json();
+        if (!res.ok) {
+          toast({ description: "Error creating appointment." });
+          mutate("/api/appointments");
+          break;
+        } else if (result.statusCode === 409) {
+          toast({
+            description:
+              "Error: An appointment already exists at this exact date and time.",
+            variant: "destructive",
+          });
+          mutate("/api/appointments");
+          break;
+        }
+      } catch (error: any) {
         toast({
-          description:
-            "Error: An appointment already exists at this exact date and time.",
+          description: error.message,
           variant: "destructive",
         });
-      } else if (!res.ok) {
-        toast({ description: "Error creating appointment." });
-      } else if (isLoading) {
-        toast({ description: "Creating appointment..." });
-      } else {
-        toast({
-          description: `Appointment created successfully for ${dateString} at ${timeString}!`,
-        });
-        mutate("/api/appointments");
+      } finally {
+        setIsSubmitting(false);
       }
-
-      setFormData({
-        date: "",
-        time: "",
-        firstName: "",
-        lastName: "",
-        clientEmail: "",
-        userId: "",
-        status: "available",
-      });
-    } catch (error: any) {
-      toast({
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
     }
+
+    if (isLoading) toast({ description: "Creating appointments..." });
+    toast({ description: "Appointments created successfully!" });
+    setFormData({
+      date: "",
+      time: "",
+      firstName: "",
+      lastName: "",
+      clientEmail: "",
+      userId: "",
+      status: "available",
+    });
+    setTimes([""]);
+    setIsSubmitting(false);
+    mutate("/api/appointments");
   };
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -143,12 +159,21 @@ export default function CreateAppointments() {
               <div>Booking the following appointment: </div>
               <div>
                 Date:{" "}
-                <span className="font-bold tracking-widest text-primary">
-                  {dateString}
-                </span>
-                , Time:{" "}
-                <span className="font-bold tracking-widest text-primary">
-                  {timeString}
+                <span className="font-bold text-sm tracking-widest text-primary">
+                  {moment(formData?.date).format("dddd, MMMM Do YYYY")}
+                </span>{" "}
+                <br />
+                Time:{" "}
+                <span className="font-bold text-sm tracking-widest text-primary">
+                  {times
+                    .filter((t) => t !== "")
+                    .map((time) => {
+                      const [hours, minutes] = time?.split(":");
+                      const hours12 = parseInt(hours) % 12 || 12;
+                      const amPm = parseInt(hours) < 12 ? "AM" : "PM";
+                      return `${hours12}:${minutes} ${amPm}`;
+                    })
+                    .join(", ")}
                 </span>
               </div>
             </div>
@@ -164,41 +189,56 @@ export default function CreateAppointments() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="mb-6 flex justify-evenly">
-        <div className="flex justify-center mb-4">
-          <div>
-            <Label htmlFor="date">Date</Label>
+      <div className="mb-6">
+        <Label htmlFor="date">Date</Label>
+        <Input
+          id="date"
+          className="text-primary-foreground"
+          type="date"
+          value={formData?.date}
+          name="date"
+          onChange={handleChange}
+        />
+      </div>
+
+      {times.map((time, index) => (
+        <div key={index} className="mb-3 flex items-center">
+          <div className="flex-grow">
+            <Label htmlFor={`time-${index}`}>Time {index + 1}</Label>
             <Input
-              id="date"
-              className="text-primary-foreground"
-              type="date"
-              value={formData?.date}
-              name="date"
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-        <div className="flex justify-center">
-          <div>
-            <Label htmlFor="time">Time</Label>
-            <Input
-              id="time"
+              id={`time-${index}`}
               className="text-primary-foreground"
               type="time"
-              name="time"
-              value={formData?.time}
-              onChange={handleChange}
+              value={time}
+              onChange={(e) => handleTimeChange(e?.target?.value, index)}
             />
           </div>
+          {times.length > 1 && (
+            <div className="mt-5">
+              <Button
+                className="h-7 text-sm flex items-center"
+                onClick={() => removeTime(index)}
+              >
+                Remove
+              </Button>
+            </div>
+          )}
         </div>
+      ))}
+
+      <div className="my-6 text-sm">
+        <Button className="h-7 flex items-center" onClick={addTime}>
+          Add Time
+        </Button>
       </div>
+
       <div className="flex justify-center">
         <Button
           onClick={openDialog}
           disabled={isSubmitting}
           className="flex items-center"
         >
-          Create Appointment
+          Create Appointments
         </Button>
       </div>
     </div>
