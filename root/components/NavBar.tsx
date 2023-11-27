@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogHeader,
   AlertDialogFooter,
+  AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -27,7 +28,7 @@ import {
 } from "@kinde-oss/kinde-auth-nextjs";
 import { Badge } from "@/components/ui/badge";
 import { roleCheck } from "@/lib/roleCheck";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { ExclamationTriangleIcon, Cross1Icon } from "@radix-ui/react-icons";
 import { Button } from "./ui/button";
 
 export default function NavBar() {
@@ -53,36 +54,39 @@ export default function NavBar() {
           </div>
         </div>
         {!isAuthenticated ? (
-          <div>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button className="p-1 bg-primary text-secondary rounded-md">
-                  Sign in
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle asChild>
-                    <div className="flex justify-center items-center">
-                      <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button className="p-1 bg-primary text-secondary rounded-md">
+                Sign in
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle asChild>
+                  <div className="flex">
+                    <div className="flex items-center flex-grow">
+                      <ExclamationTriangleIcon className="h-5 w-5 mr-2" />
                       <div>Notice</div>
                     </div>
-                  </AlertDialogTitle>
-                  <AlertDialogDescription className="text-start">
-                    To ensure a smooth sign-in experience, please use standard
-                    browsers like Safari or Chrome.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogAction asChild>
-                    <LoginLink className="p-1 bg-primary text-secondary rounded-md flex justify-center items-center w-full">
-                      Continue
-                    </LoginLink>
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+                    <AlertDialogCancel className="border-none  text-muted-foreground m-0 p-0 hover:bg-transparent">
+                      <Cross1Icon />
+                    </AlertDialogCancel>
+                  </div>
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-start">
+                  To ensure a smooth sign-in experience, please use standard
+                  browsers like Safari or Chrome.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction asChild>
+                  <LoginLink className="p-1 bg-primary text-secondary rounded-md flex justify-center items-center w-full">
+                    Continue
+                  </LoginLink>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         ) : (
           <NavigationMenuItem>
             <NavigationMenuTrigger>

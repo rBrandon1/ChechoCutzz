@@ -188,7 +188,7 @@ export default function BookAppointment() {
                                   } else {
                                     toast({
                                       description:
-                                        "You must be logged in to book an appointment!",
+                                        "You must be signed in to book an appointment!",
                                       variant: "destructive",
                                     });
                                   }
