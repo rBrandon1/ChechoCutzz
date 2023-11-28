@@ -6,7 +6,7 @@ export async function GET() {
   try {
     const { getAccessToken } = getKindeServerSession();
     const accessToken: any = await getAccessToken();
-    if (accessToken?.permissions != "admin") {
+    if (!accessToken?.permissions?.includes("admin")) {
       return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
     }
 
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   try {
     const { getAccessToken } = getKindeServerSession();
     const accessToken: any = await getAccessToken();
-    if (accessToken?.permissions != "admin") {
+    if (!accessToken?.permissions?.includes("admin")) {
       return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
     }
 
