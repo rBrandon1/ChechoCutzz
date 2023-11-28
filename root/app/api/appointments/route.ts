@@ -132,71 +132,9 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    const { getAccessToken } = getKindeServerSession();
-    const accessToken: any = await getAccessToken();
     const body: any = await req.json();
     const { id, dateTime, firstName, lastName, clientEmail, userId, status } =
       body;
-
-    if (!accessToken?.permissions?.includes("admin")) {
-      const updatedAppointment = await prisma.appointment.update({
-        where: { id },
-        data: {
-          userId,
-          firstName,
-          lastName,
-          clientEmail,
-          status,
-        },
-      });
-
-      const transporter = nodemailer.createTransport({
-        host: "smtp.zoho.com",
-        port: 465,
-        secure: true,
-        auth: {
-          user: process.env.ZOHO_EMAIL,
-          pass: process.env.ZOHO_PASSWORD,
-        },
-      });
-
-      const clientEmailContent = render(EmailConfirmation(firstName, dateTime));
-      const adminEmailContent = render(
-        AdminConfirmEmail(firstName, dateTime, clientEmail)
-      );
-
-      const clientMailOptions = {
-        from: process.env.ZOHO_EMAIL,
-        to: clientEmail,
-        subject: "Appointment Confirmation",
-        html: clientEmailContent,
-      };
-      const adminMailOptions = {
-        from: process.env.ZOHO_EMAIL,
-        to: process.env.SERGIO_EMAIL,
-        subject: "Appointment Confirmation",
-        html: adminEmailContent,
-      };
-
-      if (!dateTime) {
-        throw new Error("Missing dateTime.");
-      }
-
-      await Promise.all([
-        transporter.sendMail(clientMailOptions),
-        transporter.sendMail(adminMailOptions),
-      ]);
-
-      return NextResponse.json({
-        updatedAppointment,
-        statusText: "Appointment booked",
-        statusCode: 200,
-      });
-    }
-
-    if (!id) {
-      return NextResponse.json({ statusText: "Missing id", statusCode: 400 });
-    }
 
     const updatedAppointment = await prisma.appointment.update({
       where: { id },
@@ -209,6 +147,47 @@ export async function PUT(req: NextRequest) {
         status,
       },
     });
+
+    const transporter = nodemailer.createTransport({
+      host: "smtp.zoho.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.ZOHO_EMAIL,
+        pass: process.env.ZOHO_PASSWORD,
+      },
+    });
+
+    const clientEmailContent = render(EmailConfirmation(firstName, dateTime));
+    const adminEmailContent = render(
+      AdminConfirmEmail(firstName, dateTime, clientEmail)
+    );
+
+    const clientMailOptions = {
+      from: process.env.ZOHO_EMAIL,
+      to: clientEmail,
+      subject: "Appointment Confirmation",
+      html: clientEmailContent,
+    };
+    const adminMailOptions = {
+      from: process.env.ZOHO_EMAIL,
+      to: process.env.SERGIO_EMAIL,
+      subject: "Appointment Confirmation",
+      html: adminEmailContent,
+    };
+
+    if (!dateTime) {
+      throw new Error("Missing dateTime.");
+    }
+
+    await Promise.all([
+      transporter.sendMail(clientMailOptions),
+      transporter.sendMail(adminMailOptions),
+    ]);
+
+    if (!id) {
+      return NextResponse.json({ statusText: "Missing id", statusCode: 400 });
+    }
 
     return NextResponse.json({
       updatedAppointment,
