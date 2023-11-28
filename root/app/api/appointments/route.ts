@@ -7,6 +7,7 @@ import EmailConfirmation from "@/components/EmailConfirmation";
 import EmailDeletion from "@/components/EmailDeletion";
 import AdminConfirmEmail from "@/components/AdminConfirmEmail";
 import AdminDeleteEmail from "@/components/AdminDeleteEmail";
+import moment from "moment-timezone";
 
 export async function GET(req: NextRequest) {
   try {
@@ -68,6 +69,16 @@ export async function POST(req: NextRequest) {
     const { id, dateTime, firstName, lastName, clientEmail, userId, status } =
       body;
 
+    const userExists = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!userExists) {
+      return NextResponse.json({
+        statusText: "User not found",
+        statusCode: 404,
+      });
+    }
+
     const existingAppointment = await prisma.appointment.findFirst({
       where: {
         dateTime: new Date(dateTime),
@@ -80,6 +91,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         statusText: "Duplicate appointment exists.",
         statusCode: 409,
+      });
+    }
+
+    const appointmentDateTime = moment.tz(
+      body?.dateTime,
+      "America/Los_Angeles"
+    );
+    if (
+      appointmentDateTime?.isBefore(
+        moment.tz("America/Los_Angeles").startOf("day")
+      )
+    ) {
+      return NextResponse.json({
+        statusText: "Appointment date is in the past",
+        statusCode: 400,
       });
     }
 
@@ -100,7 +126,7 @@ export async function POST(req: NextRequest) {
       statusCode: 201,
     });
   } catch (e: any) {
-    return NextResponse.json({ statusText: e.message, statusCode: 500 });
+    return NextResponse.json({ statusText: e?.message, statusCode: 500 });
   }
 }
 

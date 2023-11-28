@@ -90,6 +90,7 @@ export default function AdminDashboard() {
         });
         mutate("/api/appointments");
       }
+      mutate("/api/appointments");
     } catch (error: any) {
       toast({
         description: error.message,
@@ -113,7 +114,7 @@ export default function AdminDashboard() {
         <AppointmentSkeleton />
       ) : filteredAppointments?.length > 0 ? (
         <div className="overflow-auto mx-auto w-full">
-          <div>
+          <div className="mx-4">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -235,8 +236,14 @@ export default function AdminDashboard() {
           </div>
         </div>
       ) : (
-        <div className="text-lg">
-          <h1>No appointments available on this day.</h1>
+        <div className="flex items-center justify-start w-full text-center mx-4">
+          <div>
+            No available appointments on:
+            <br />
+            <span className="tracking-widest text-muted-foreground">
+              {selectedDate?.toLocaleDateString()}
+            </span>
+          </div>
         </div>
       )}
     </div>

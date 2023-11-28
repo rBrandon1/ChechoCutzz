@@ -21,12 +21,12 @@ model User {
 }
 
 model Appointment {
-  id          Int       @id @default(autoincrement())
-  dateTime    DateTime?
-  firstName   String?
-  lastName    String?
-  clientEmail String?
+  id          Int      @id @default(autoincrement())
+  dateTime    DateTime
+  firstName   String
+  lastName    String
+  clientEmail String
   userId      String
-  user        User      @relation(fields: [userId], references: [id]) // known as a foreign key
+  user        User     @relation(fields: [userId], references: [id]) // known as a foreign key
   status      String
 }

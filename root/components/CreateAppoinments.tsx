@@ -15,7 +15,6 @@ import {
   AlertDialogDescription,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { formatDateAndTime } from "@/lib/formatDateTime";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
@@ -24,7 +23,6 @@ export default function CreateAppointments() {
   const { user, isLoading } = useKindeBrowserClient();
   const [formData, setFormData] = useState({
     date: "",
-    time: "",
     firstName: "",
     lastName: "",
     clientEmail: "",
@@ -49,7 +47,7 @@ export default function CreateAppointments() {
   };
 
   useEffect(() => {
-    if (user && !formData.userId) {
+    if (user && !formData?.userId) {
       setFormData((fData) => ({
         ...fData,
         userId: user?.id as string,
@@ -58,11 +56,11 @@ export default function CreateAppointments() {
   }, [user, formData?.userId]);
 
   const validateForm = () => {
-    return formData?.date !== "" && times.some((time) => time !== "");
+    return formData?.date !== "" && times?.some((time) => time !== "");
   };
 
   const handleChange = (e: any) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({ ...formData, [e?.target.name]: e?.target.value });
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -70,10 +68,10 @@ export default function CreateAppointments() {
     setIsSubmitting(true);
 
     for (const time of times) {
-      const formattedTime = `${formData.date}T${time}:00.000`;
+      const formattedTime = `${formData?.date}T${time}:00.000`;
       const localDateTime = moment(formattedTime);
       const pacificDateTimeISO = localDateTime
-        .tz("America/Los_Angeles")
+        .tz("America/Los_Angeles", false)
         .format();
 
       const submissionData = {
@@ -89,9 +87,8 @@ export default function CreateAppointments() {
           },
           body: JSON.stringify(submissionData),
         });
-
         const result = await res.json();
-        if (!res.ok) {
+        if (result.statusCode === 500) {
           toast({ description: "Error creating appointment." });
           mutate("/api/appointments");
           break;
@@ -118,7 +115,6 @@ export default function CreateAppointments() {
     toast({ description: "Appointments created successfully!" });
     setFormData({
       date: "",
-      time: "",
       firstName: "",
       lastName: "",
       clientEmail: "",
@@ -195,6 +191,7 @@ export default function CreateAppointments() {
           id="date"
           className="text-primary-foreground"
           type="date"
+          min={moment().format("YYYY-MM-DD")}
           value={formData?.date}
           name="date"
           onChange={handleChange}

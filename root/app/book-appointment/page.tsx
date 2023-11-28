@@ -26,11 +26,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function BookAppointment() {
   const { user, isLoading, isAuthenticated } = useKindeBrowserClient();
   const { data, mutate } = useSWR("/api/appointments", fetcher);
   const { toast } = useToast();
+  const router = useRouter();
 
   const currentPrice = "30";
 
@@ -76,6 +78,7 @@ export default function BookAppointment() {
       toast({
         description: "Appointment booked!",
       });
+      router.push("/");
     } catch (error: any) {
       toast({
         description: error.message,
@@ -206,8 +209,14 @@ export default function BookAppointment() {
               </TableBody>
             </Table>
           ) : (
-            <div className="text-lg">
-              <h1>No appointments available on this day.</h1>
+            <div className="flex items-center justify-center md:justify-start h-full text-center">
+              <div>
+                No available appointments on:
+                <br />
+                <span className="tracking-widest text-muted-foreground">
+                  {selectedDate?.toLocaleDateString()}
+                </span>
+              </div>
             </div>
           )}
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Calendar } from "@/components/ui/calendar";
+import moment from "moment-timezone";
 
 const CalendarComponent = ({
   appointments,
@@ -8,21 +9,27 @@ const CalendarComponent = ({
   onDateSelect,
   userRole = "user",
 }: any) => {
-  const today = new Date();
-  const isToday = (date: Date) =>
-    date?.toDateString() === today?.toDateString();
-  const isPastDate = (date: number) => date < today.getTime();
+  const timezone = "America/Los_Angeles";
+  const today = moment.tz(new Date(), timezone).startOf("day");
+
+  const isToday = (date: Date) => {
+    const dateMoment = moment(date).startOf("day");
+    return dateMoment.isSame(today, "day");
+  };
+
+  const isPastDate = (date: moment.Moment) => {
+    return moment.tz(date, timezone).isBefore(today);
+  };
 
   const hadAppointment = (date: Date) => {
     return appointments?.some((appointment: any) => {
-      const appointmentDate = new Date(appointment?.dateTime);
+      const appointmentDate = moment.tz(appointment?.dateTime, timezone);
       return (
-        isPastDate(appointmentDate?.getTime()) &&
-        appointmentDate?.toDateString() === date?.toDateString()
+        isPastDate(appointmentDate) &&
+        appointmentDate?.isSame(moment.tz(date, timezone), "day")
       );
     });
   };
-
   const isFullyBooked = (date: Date) => {
     const dateAppointments = appointments?.filter((appointment: any) => {
       const appointmentDate = new Date(appointment?.dateTime);
@@ -37,13 +44,16 @@ const CalendarComponent = ({
   };
 
   const availableDates = appointments
-    ?.filter(
-      (appointment: any) =>
-        appointment?.status === "available" &&
-        !isPastDate(appointment?.dateTime) &&
-        !isFullyBooked(appointment)
-    )
-    .map((appointment: any) => new Date(appointment?.dateTime));
+    ?.filter((appointment: any) => {
+      const appointmentDate = moment.tz(appointment?.dateTime, timezone);
+      return (
+        appointment?.status === "available" && !isPastDate(appointmentDate)
+      );
+    })
+    .map((appointment: any) =>
+      moment.tz(appointment?.dateTime, timezone).toDate()
+    );
+
   const handleDaySelect = (date: any) => {
     onDateSelect(date);
   };
@@ -60,18 +70,18 @@ const CalendarComponent = ({
               d?.toISOString().split("T")[0] ===
                 date?.toISOString().split("T")[0] &&
               !isPastDate(d?.getTime()) &&
-              !isPastDate(date?.getTime()) &&
-              !isToday(date)
+              !isPastDate(moment(date)) &&
+              !isToday(date) &&
+              !isToday(d)
           ),
         fullyBooked: (date) => userRole === "admin" && isFullyBooked(date),
         past: (date) =>
           userRole === "admin" &&
           hadAppointment(date) &&
-          isPastDate(date?.getTime()) &&
+          isPastDate(moment(date)) &&
           !isToday(date),
         today: isToday,
-        selected: (date) =>
-          date?.toDateString() === selectedDate?.toDateString(),
+        selected: (date) => moment(date).isSame(selectedDate, "day"),
       }}
       modifiersStyles={{
         fullyBooked: { backgroundColor: "hsl(144.9 80.4% 10%)" },
