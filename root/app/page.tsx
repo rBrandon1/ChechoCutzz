@@ -13,9 +13,11 @@ import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/autoplay";
+import { roleCheck } from "@/lib/roleCheck";
 
 export default function Home() {
   const { user, permissions } = useKindeBrowserClient();
+  const userRole = roleCheck(permissions);
 
   const createUser = async (userData: any) => {
     try {
@@ -40,7 +42,7 @@ export default function Home() {
         email: user?.email,
         firstName: user?.given_name,
         lastName: user?.family_name,
-        role: permissions?.includes("admin") ? "admin" : "user",
+        role: userRole,
       };
       createUser(userData);
     }

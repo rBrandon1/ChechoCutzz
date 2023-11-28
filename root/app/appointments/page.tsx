@@ -56,7 +56,7 @@ export default function UserAppointments() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {appointments.map((appointment: any) => {
+        {appointments?.map((appointment: any) => {
           const { dateString, timeString } = formatDateAndTime(
             appointment?.dateTime
           );

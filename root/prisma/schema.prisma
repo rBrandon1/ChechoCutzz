@@ -17,6 +17,7 @@ model User {
   firstName    String
   lastName     String
   role         String
+  picture      String
   appointments Appointment[]
 }
 
