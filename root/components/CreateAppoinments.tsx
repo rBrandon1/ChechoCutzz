@@ -88,19 +88,27 @@ export default function CreateAppointments() {
           body: JSON.stringify(submissionData),
         });
         const result = await res.json();
-        if (result.statusCode === 500) {
+        if (result?.statusCode === 500) {
           toast({ description: "Error creating appointment." });
           mutate("/api/appointments");
           break;
-        } else if (result.statusCode === 409) {
+        } else if (result?.statusCode === 409) {
           toast({
             description:
-              "Error: An appointment already exists at this exact date and time.",
+              "An appointment already exists at this exact date and time.",
             variant: "destructive",
           });
           mutate("/api/appointments");
           break;
+        } else if (result?.statusText === "Appointment date is in the past.") {
+          toast({
+            description:
+              "Appointment date is in the past. Please select a future date.",
+            variant: "destructive",
+          });
+          mutate("/api/appointments");
         }
+        mutate("/api/appointments");
       } catch (error: any) {
         toast({
           description: error.message,

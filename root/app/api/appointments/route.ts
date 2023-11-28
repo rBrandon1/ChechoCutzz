@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
       )
     ) {
       return NextResponse.json({
-        statusText: "Appointment date is in the past",
+        statusText: "Appointment date is in the past.",
         statusCode: 400,
       });
     }
@@ -247,7 +247,6 @@ export async function DELETE(req: NextRequest) {
 
     if (status === "available") {
       await prisma.appointment.delete({ where: { id } });
-      console.log(id);
       return NextResponse.json({ statusText: "Deleted", statusCode: 200 });
     }
 
@@ -287,6 +286,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ statusText: "Deleted", statusCode: 200 });
   } catch (e: any) {
+    console.log(e?.message);
     return NextResponse.json({
       statusText: e?.message || "Error deleting appointment",
       statusCode: 500,
