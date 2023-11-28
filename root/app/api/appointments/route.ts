@@ -286,9 +286,8 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ statusText: "Deleted", statusCode: 200 });
   } catch (e: any) {
-    console.log(e?.message);
     return NextResponse.json({
-      statusText: e?.message || "Error deleting appointment",
+      statusText: e,
       statusCode: 500,
     });
   }
