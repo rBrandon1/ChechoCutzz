@@ -77,6 +77,7 @@ export default function AdminDashboard() {
       });
 
       const result = await res.json();
+      console.log(result);
       if (result.statusCode !== 200) {
         toast({
           description: "Error deleting appointment.",
