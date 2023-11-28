@@ -166,13 +166,13 @@ export async function PUT(req: NextRequest) {
       );
 
       const clientMailOptions = {
-        from: process.env.ZOHO_EMAIL,
+        from: process.env.ZOHO_SENDER,
         to: clientEmail,
         subject: "Appointment Confirmation",
         html: clientEmailContent,
       };
       const adminMailOptions = {
-        from: process.env.ZOHO_EMAIL,
+        from: process.env.ZOHO_SENDER,
         to: process.env.SERGIO_EMAIL,
         subject: "Appointment Confirmation",
         html: adminEmailContent,
@@ -266,13 +266,13 @@ export async function DELETE(req: NextRequest) {
     );
 
     const clientMailOptions = {
-      from: process.env.ZOHO_EMAIL,
+      from: process.env.ZOHO_SENDER,
       to: clientEmail,
       subject: "Appointment Deleted",
       html: clientEmailContent,
     };
     const adminMailOptions = {
-      from: process.env.ZOHO_EMAIL,
+      from: process.env.ZOHO_SENDER,
       to: process.env.SERGIO_EMAIL,
       subject: "Appoinment Deleted",
       html: adminEmailContent,
