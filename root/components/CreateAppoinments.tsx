@@ -107,6 +107,8 @@ export default function CreateAppointments() {
             variant: "destructive",
           });
           mutate("/api/appointments");
+        } else if (isLoading) {
+          toast({ description: "Creating appointments..." });
         }
         mutate("/api/appointments");
       } catch (error: any) {
