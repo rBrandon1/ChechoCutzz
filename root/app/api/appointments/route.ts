@@ -138,7 +138,7 @@ export async function PUT(req: NextRequest) {
     const { id, dateTime, firstName, lastName, clientEmail, userId, status } =
       body;
 
-    if (!accessToken.permissions.includes("admin")) {
+    if (!accessToken?.permissions?.includes("admin")) {
       const updatedAppointment = await prisma.appointment.update({
         where: { id },
         data: {
@@ -216,7 +216,7 @@ export async function PUT(req: NextRequest) {
       statusCode: 200,
     });
   } catch (e: any) {
-    return NextResponse.json({ statusText: e.message, statusCode: 500 });
+    return NextResponse.json({ statusText: e, statusCode: 500 });
   }
 }
 
