@@ -30,10 +30,39 @@ import { Badge } from "@/components/ui/badge";
 import { roleCheck } from "@/lib/roleCheck";
 import { ExclamationTriangleIcon, Cross1Icon } from "@radix-ui/react-icons";
 import { Button } from "./ui/button";
+import { useEffect } from "react";
 
 export default function NavBar() {
   const { user, isAuthenticated, permissions } = useKindeBrowserClient();
   const userRole = roleCheck(permissions);
+
+  const createUserInDatabase = async () => {
+    if (user && isAuthenticated) {
+      try {
+        const res = await fetch("/api/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: user?.id,
+            email: user?.email,
+            firstName: user?.given_name,
+            lastName: user?.family_name,
+            role: permissions?.includes("admin") ? "admin" : "user",
+          }),
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to create or update user in database");
+        }
+      } catch (error: any) {
+        console.error("Error creating user in database:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    createUserInDatabase();
+  }, [user, isAuthenticated]);
 
   return (
     <NavigationMenu>
