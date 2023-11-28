@@ -179,7 +179,7 @@ export async function PUT(req: NextRequest) {
       };
 
       if (!dateTime) {
-        throw new Error("Missing dateTime");
+        throw new Error("Missing dateTime.");
       }
 
       await Promise.all([
