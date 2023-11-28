@@ -34,12 +34,6 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { getAccessToken } = getKindeServerSession();
-    const accessToken: any = await getAccessToken();
-    if (!accessToken?.permissions?.includes("admin")) {
-      return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
-    }
-
     const body: any = await req.json();
     const { id, email, firstName, lastName, role } = body;
 
