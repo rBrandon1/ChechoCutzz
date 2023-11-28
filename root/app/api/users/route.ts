@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/client";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/dist/session";
 
 export async function GET() {
   try {
+    const { getAccessToken } = getKindeServerSession();
+    const accessToken: any = await getAccessToken();
+
+    if (!accessToken?.permissions?.includes("admin")) {
+      return NextResponse.json({ statusCode: 403, statusText: "Forbidden" });
+    }
+
     const users = await prisma.user.findMany({
       select: {
         id: true,
