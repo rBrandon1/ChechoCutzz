@@ -32,32 +32,47 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import AppointmentSkeleton from "./AppointmentSkeleton";
+import moment from "moment-timezone";
 
 export default function AdminDashboard() {
   const { isLoading } = useKindeBrowserClient();
   const { data, mutate } = useSWR("/api/appointments", fetcher);
   const { toast } = useToast();
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const timezone = "America/Los_Angeles";
+
+  const [selectedDate, setSelectedDate] = useState(
+    moment.tz(new Date(), timezone).toDate()
+  );
+
   const handleDateSelect = (date: any) => {
-    setSelectedDate(date);
+    setSelectedDate(moment.tz(date, timezone).toDate());
   };
+
   const filteredAppointments = data?.appointments
     ?.filter((appointment: any) => {
-      const appointmentDate = new Date(appointment?.dateTime).toDateString();
-      return appointmentDate === selectedDate?.toDateString();
+      const appointmentDateTime = moment
+        .tz(appointment, timezone)
+        .toDate()
+        .getTime();
+      const now = moment.tz(new Date(), timezone).toDate().getTime();
+
+      return (
+        appointmentDateTime >= now &&
+        appointment?.status === "available" &&
+        moment.tz(appointment?.dateTime, timezone).isSame(selectedDate, "day")
+      );
     })
     .sort((a: any, b: any) => {
-      const timeA = new Date(a.dateTime).getTime();
-      const timeB = new Date(b.dateTime).getTime();
+      const timeA = moment.tz(a.dateTime, timezone).toDate().getTime();
+      const timeB = moment.tz(b.dateTime, timezone).toDate().getTime();
       return timeA - timeB;
     });
 
   const appointmentsByDate = data?.appointments?.filter((appointment: any) => {
-    return (
-      new Date(appointment?.dateTime).toDateString() ===
-      selectedDate?.toDateString()
-    );
+    return moment
+      .tz(appointment?.dateTime, timezone)
+      .isSame(selectedDate, "day");
   });
 
   const handleDeleteAppointment = async (appointment: any) => {
@@ -104,7 +119,7 @@ export default function AdminDashboard() {
       <div className="mb-4 md:mb-0 md:mr-4 rounded-md border shadow">
         <CalendarComponent
           appointments={data?.appointments}
-          selectedDate={selectedDate}
+          selectedDate={moment.tz(selectedDate, timezone).toDate()}
           onDateSelect={handleDateSelect}
           userRole="admin"
         />
@@ -241,7 +256,7 @@ export default function AdminDashboard() {
             No available appointments on:
             <br />
             <span className="tracking-widest text-muted-foreground">
-              {selectedDate?.toLocaleDateString()}
+              {moment.tz(selectedDate, timezone).format("LL")}
             </span>
           </div>
         </div>

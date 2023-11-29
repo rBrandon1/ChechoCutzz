@@ -4,6 +4,7 @@ import NavBar from "@/components/NavBar";
 import Link from "next/link";
 import { Toaster } from "@/components/ui/toaster";
 import { Metadata } from "next";
+import moment from "moment-timezone";
 
 export const metadata: Metadata = {
   title: "ChechoCutzz",
@@ -54,7 +55,8 @@ export default async function RootLayout({
                 rel="noreferrer"
                 className="underline underline-offset-[3px] text-muted-foreground hover:text-accent"
               >
-                © Brandon Ramirez {new Date().getFullYear()}
+                © Brandon Ramirez{" "}
+                {moment.tz(new Date(), "America/Los_Angeles").year()}
               </Link>
             </div>
             <div>

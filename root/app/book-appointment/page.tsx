@@ -27,6 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import moment from "moment-timezone";
 
 export default function BookAppointment() {
   const { user, isLoading, isAuthenticated } = useKindeBrowserClient();
@@ -35,6 +36,7 @@ export default function BookAppointment() {
   const router = useRouter();
 
   const currentPrice = "30";
+  const timezone = "America/Los_Angeles";
 
   const bookAppointment = async (appointment: any) => {
     const updatedData = {
@@ -87,25 +89,30 @@ export default function BookAppointment() {
     }
   };
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(
+    moment.tz(new Date(), timezone).toDate()
+  );
   const handleDateSelect = (date: any) => {
-    setSelectedDate(date);
+    setSelectedDate(moment.tz(date, timezone).toDate());
   };
+
   const filteredAppointments = data?.appointments
     ?.filter((appointment: any) => {
-      const appointmentDateTime = new Date(appointment?.dateTime).getTime();
-      const now = new Date().getTime();
+      const appointmentDateTime = moment
+        .tz(appointment, timezone)
+        .toDate()
+        .getTime();
+      const now = moment.tz(new Date(), timezone).toDate().getTime();
 
       return (
         appointmentDateTime >= now &&
         appointment?.status === "available" &&
-        new Date(appointment?.dateTime).toDateString() ===
-          selectedDate?.toDateString()
+        moment.tz(appointment?.dateTime, timezone).isSame(selectedDate, "day")
       );
     })
     .sort((a: any, b: any) => {
-      const timeA = new Date(a?.dateTime).getTime();
-      const timeB = new Date(b?.dateTime).getTime();
+      const timeA = moment.tz(a.dateTime, timezone).toDate().getTime();
+      const timeB = moment.tz(b.dateTime, timezone).toDate().getTime();
       return timeA - timeB;
     });
 
@@ -214,7 +221,7 @@ export default function BookAppointment() {
                 No available appointments on:
                 <br />
                 <span className="tracking-widest text-muted-foreground">
-                  {selectedDate?.toLocaleDateString()}
+                  {moment.tz(selectedDate, timezone).format("LL")}
                 </span>
               </div>
             </div>
