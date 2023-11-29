@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
 
     const existingAppointment = await prisma.appointment.findFirst({
       where: {
-        dateTime: new Date(dateTime),
+        dateTime: moment(dateTime).toDate(),
         userId,
         status: { in: ["available", "booked"] },
       },
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
     const newAppointment = await prisma.appointment.create({
       data: {
         id,
-        dateTime: new Date(dateTime),
+        dateTime: moment(dateTime).toDate(),
         firstName,
         lastName,
         clientEmail,
@@ -139,7 +139,7 @@ export async function PUT(req: NextRequest) {
     const updatedAppointment = await prisma.appointment.update({
       where: { id },
       data: {
-        dateTime: new Date(dateTime),
+        dateTime: moment(dateTime).toDate(),
         firstName,
         lastName,
         clientEmail,

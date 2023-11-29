@@ -13,8 +13,7 @@ const CalendarComponent = ({
   const today = moment.tz(new Date(), timezone).startOf("day");
 
   const isToday = (date: Date) => {
-    const dateMoment = moment(date).startOf("day");
-    return dateMoment.isSame(today, "day");
+    return moment(date).isSame(moment(), "day");
   };
 
   const isPastDate = (date: moment.Moment) => {
