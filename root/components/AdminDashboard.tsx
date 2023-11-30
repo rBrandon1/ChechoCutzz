@@ -174,7 +174,7 @@ export default function AdminDashboard() {
                                   </AlertDialogTrigger>
                                   <AlertDialogContent>
                                     <AlertDialogTitle>
-                                      Confirm deletion
+                                      Confirm Deletion
                                     </AlertDialogTitle>
                                     <AlertDialogDescription>
                                       Are you sure you want to delete this
@@ -249,15 +249,14 @@ export default function AdminDashboard() {
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-start w-full text-center mx-4">
+        <div className="flex items-center justify-center md:justify-start w-full text-center mx-4">
           <div>
             No available appointments on:
             <br />
             <span className="tracking-widest text-muted-foreground">
               {DateTime.fromJSDate(selectedDate.toJSDate())
                 .toLocal()
-                .toJSDate()
-                .toDateString()}
+                .toLocaleString(DateTime.DATE_MED_WITH_WEEKDAY)}
             </span>
           </div>
         </div>

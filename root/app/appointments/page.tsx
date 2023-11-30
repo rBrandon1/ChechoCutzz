@@ -14,25 +14,45 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import Link from "next/link";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
+import { DateTime } from "luxon";
+import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 
 export default function UserAppointments() {
   const { user, isLoading } = useKindeBrowserClient();
-  const { data: appointmentsData } = useSWR(
+  const { data: appointmentsData, mutate } = useSWR(
     user ? `/api/appointments?userId=${user?.id}` : null,
     fetcher
   );
+  const { toast } = useToast();
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [previousAppointments, setPreviousAppointments] = useState([]);
-
   useEffect(() => {
-    if (appointmentsData?.appointments) {
-      const sortedAppointments = appointmentsData?.appointments?.sort(
-        (a: any, b: any) =>
-          new Date(a?.dateTime).getTime() - new Date(b?.dateTime).getTime()
-      );
-      const now = new Date().getTime();
+    if (appointmentsData?.convertedAppointments) {
+      const now = DateTime.now().toLocal().toMillis();
+      const sortedAppointments = appointmentsData?.convertedAppointments
+        ?.map((appointment: any) => ({
+          ...appointment,
+          dateTime: DateTime.fromISO(appointment?.dateTime).toLocal().toISO(),
+        }))
+        .sort((a: any, b: any) => {
+          return (
+            DateTime.fromISO(a.dateTime).toLocal().toMillis() -
+            DateTime.fromISO(b.dateTime).toLocal().toMillis()
+          );
+        });
+
       setUpcomingAppointments(
         sortedAppointments?.filter(
           (appointment: any) => new Date(appointment?.dateTime).getTime() > now
@@ -46,13 +66,52 @@ export default function UserAppointments() {
     }
   }, [appointmentsData]);
 
+  const handleCancelAppointment = async (
+    appointmentId: string,
+    dateTime: string,
+    clientEmail: string,
+    firstName: string,
+    lastName: string
+  ) => {
+    try {
+      const res = await fetch(`/api/appointments`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: appointmentId,
+          dateTime: dateTime,
+          clientEmail,
+          firstName,
+          lastName,
+          initiatedByUser: true,
+        }),
+      });
+
+      const result = await res.json();
+      if (result?.statusCode === 200) {
+        toast({ description: "Appointment cancelled successfully." });
+        mutate("/api/appointments");
+      } else {
+        toast({
+          description: "Failed to cancel appointment.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        description: "An error occurred while cancelling the appointment.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const renderAppointmentTable = (appointments: any) => (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead className="text-center">Date</TableHead>
           <TableHead className="text-center">Time</TableHead>
-          <TableHead className="text-center">Status</TableHead>
+          <TableHead className="text-center">Cancel</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -64,7 +123,43 @@ export default function UserAppointments() {
             <TableRow key={appointment?.id} className="text-center">
               <TableCell>{dateString}</TableCell>
               <TableCell>{timeString}</TableCell>
-              <TableCell>{appointment?.status}</TableCell>
+              <TableCell>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button>Cancel</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogTitle>Confirm Cancellation</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to cancel this appoinment?
+                      <br />
+                      <span className="text-red-500">
+                        {dateString} at {timeString}
+                      </span>
+                    </AlertDialogDescription>
+                    <AlertDialogCancel asChild>
+                      <Button size="sm" className="text-primary">
+                        Cancel
+                      </Button>
+                    </AlertDialogCancel>
+                    <AlertDialogAction asChild>
+                      <Button
+                        onClick={() => {
+                          handleCancelAppointment(
+                            appointment?.id,
+                            appointment?.dateTime,
+                            appointment?.clientEmail,
+                            appointment?.firstName,
+                            appointment?.lastName
+                          );
+                        }}
+                      >
+                        Confirm
+                      </Button>
+                    </AlertDialogAction>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </TableCell>
             </TableRow>
           );
         })}

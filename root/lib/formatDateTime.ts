@@ -1,8 +1,11 @@
 import { DateTime } from "luxon";
 
 export const formatDateAndTime = (dateTime: any) => {
-  const dateString = DateTime.fromISO(dateTime).toLocal().toLocaleString();
-  const timeString = DateTime.fromISO(dateTime).toLocal().toFormat("h:mm a");
+  const localDateTime = DateTime.fromISO(dateTime).toLocal();
+  const dateString = localDateTime.toLocaleString(
+    DateTime.DATE_MED_WITH_WEEKDAY
+  );
+  const timeString = localDateTime.toLocaleString(DateTime.TIME_SIMPLE);
 
   return { dateString, timeString };
 };

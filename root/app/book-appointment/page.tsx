@@ -215,12 +215,14 @@ export default function BookAppointment() {
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center md:justify-start h-full text-center">
+          <div className="flex items-center justify-center md:justify-start w-full text-center">
             <div>
               No available appointments on:
               <br />
               <span className="tracking-widest text-muted-foreground">
-                {selectedDate?.startOf("day").toJSDate().toDateString()}
+                {DateTime.fromJSDate(selectedDate.toJSDate())
+                  .toLocal()
+                  .toLocaleString(DateTime.DATE_MED_WITH_WEEKDAY)}
               </span>
             </div>
           </div>

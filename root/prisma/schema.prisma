@@ -27,7 +27,7 @@ model Appointment {
   firstName   String
   lastName    String
   clientEmail String
-  userId      String
-  user        User     @relation(fields: [userId], references: [id]) // known as a foreign key
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id]) // known as a foreign key
   status      String
 }

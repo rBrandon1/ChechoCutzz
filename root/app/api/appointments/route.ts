@@ -8,6 +8,8 @@ import EmailDeletion from "@/components/EmailDeletion";
 import AdminConfirmEmail from "@/components/AdminConfirmEmail";
 import AdminDeleteEmail from "@/components/AdminDeleteEmail";
 import { DateTime } from "luxon";
+import EmailCancellation from "@/components/EmailCancellation";
+import AdminCancelEmail from "@/components/AdminCancelEmail";
 
 export async function GET(req: NextRequest) {
   try {
@@ -206,16 +208,86 @@ export async function DELETE(req: NextRequest) {
   const { getAccessToken } = getKindeServerSession();
   const accessToken: any = await getAccessToken();
 
-  if (!accessToken?.permissions?.includes("admin")) {
-    return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
-  }
   try {
     const body: any = await req.json();
-    const { id, dateTime, clientEmail, firstName, status } = body;
+    const {
+      id,
+      dateTime,
+      clientEmail,
+      firstName,
+      lastName,
+      status,
+      initiatedByUser,
+    } = body;
+    const transporter = nodemailer.createTransport({
+      host: "smtp.zoho.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.ZOHO_EMAIL,
+        pass: process.env.ZOHO_PASSWORD,
+      },
+    });
 
     if (!id) {
       return NextResponse.json({ statusText: "Missing id", statusCode: 400 });
     }
+
+    if (initiatedByUser && !accessToken?.permissions?.includes("admin")) {
+      const appointmentToUpdate = await prisma.appointment.findUnique({
+        where: { id },
+      });
+
+      if (!appointmentToUpdate) {
+        return NextResponse.json({
+          statusText: "Appointment not found",
+          statusCode: 404,
+        });
+      }
+
+      const clientEmailContent = render(EmailCancellation(firstName, dateTime));
+      const adminEmailContent = render(
+        AdminCancelEmail(firstName, lastName, dateTime, clientEmail)
+      );
+      const clientMailOptions = {
+        from: process.env.ZOHO_EMAIL,
+        to: clientEmail,
+        subject: "Appointment Cancellation",
+        html: clientEmailContent,
+      };
+      const adminMailOptions = {
+        from: process.env.ZOHO_EMAIL,
+        to: process.env.SERGIO_EMAIL,
+        subject: "Appointment Cancellation",
+        html: adminEmailContent,
+      };
+
+      await Promise.all([
+        transporter.sendMail(clientMailOptions),
+        transporter.sendMail(adminMailOptions),
+      ]);
+
+      await prisma.appointment.update({
+        where: { id },
+        data: {
+          userId: null,
+          firstName: "",
+          lastName: "",
+          clientEmail: "",
+          status: "available",
+        },
+      });
+
+      return NextResponse.json({
+        statusText: "Appointment cancelled",
+        statusCode: 200,
+      });
+    }
+
+    if (!accessToken?.permissions?.includes("admin")) {
+      return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
+    }
+
     const appointmentToDelete = await prisma.appointment.findUnique({
       where: { id },
     });
@@ -231,16 +303,6 @@ export async function DELETE(req: NextRequest) {
       await prisma.appointment.delete({ where: { id } });
       return NextResponse.json({ statusText: "Deleted", statusCode: 200 });
     }
-
-    const transporter = nodemailer.createTransport({
-      host: "smtp.zoho.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.ZOHO_EMAIL,
-        pass: process.env.ZOHO_PASSWORD,
-      },
-    });
 
     const clientEmailContent = render(EmailDeletion(firstName, dateTime));
     const adminEmailContent = render(
