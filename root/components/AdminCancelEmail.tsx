@@ -25,7 +25,7 @@ export default function AdminCancelEmail(
         <Text>
           {firstName} {lastName} has cancelled their appointment for{" "}
           {dateString} at {timeString}. The appointment has been set to
-          "available" and can be booked by another client.
+          &quot;available&quot; and can be booked by another client.
         </Text>
         <Text>
           You can contact them at{" "}
