@@ -2,11 +2,11 @@
 
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { useEffect, useState } from "react";
-import moment from "moment-timezone";
 import { useToast } from "@/components/ui/use-toast";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { Button } from "@/components/ui/button";
+import { DateTime } from "luxon";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -68,15 +68,12 @@ export default function CreateAppointments() {
     setIsSubmitting(true);
 
     for (const time of times) {
-      const formattedTime = `${formData?.date}T${time}:00.000`;
-      const localDateTime = moment(formattedTime);
-      const pacificDateTimeISO = localDateTime
-        .tz("America/Los_Angeles", false)
-        .format();
-
+      const dateTime = DateTime.fromISO(`${formData.date}T${time}`, {
+        zone: "America/Los_Angeles",
+      }).toUTC();
       const submissionData = {
         ...formData,
-        dateTime: pacificDateTimeISO,
+        dateTime: dateTime.toISO(),
       };
 
       try {
@@ -92,13 +89,12 @@ export default function CreateAppointments() {
           toast({ description: "Error creating appointment." });
           mutate("/api/appointments");
           break;
-        } else if (result?.statusCode === 409) {
+        } else if (result?.statusText === "Duplicate appointment exists.") {
           toast({
             description:
               "An appointment already exists at this exact date and time.",
             variant: "destructive",
           });
-          mutate("/api/appointments");
           break;
         } else if (result?.statusText === "Appointment date is in the past.") {
           toast({
@@ -106,7 +102,6 @@ export default function CreateAppointments() {
               "Appointment date is in the past. Please select a future date.",
             variant: "destructive",
           });
-          mutate("/api/appointments");
         } else if (isLoading) {
           toast({ description: "Creating appointments..." });
         }
@@ -122,6 +117,7 @@ export default function CreateAppointments() {
     }
 
     if (isLoading) toast({ description: "Creating appointments..." });
+
     toast({ description: "Appointments created successfully!" });
     setFormData({
       date: "",
@@ -162,11 +158,15 @@ export default function CreateAppointments() {
           <AlertDialogTitle>Creating Appointment</AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="inline">
-              <div>Booking the following appointment: </div>
+              <div>Creating the following appointment: </div>
               <div>
                 Date:{" "}
                 <span className="font-bold text-sm tracking-widest text-primary">
-                  {moment(formData?.date).format("dddd, MMMM Do YYYY")}
+                  {DateTime.fromISO(formData?.date, {
+                    zone: "America/Los_Angeles",
+                  })
+                    .toJSDate()
+                    .toDateString()}
                 </span>{" "}
                 <br />
                 Time:{" "}
@@ -201,7 +201,10 @@ export default function CreateAppointments() {
           id="date"
           className="text-primary-foreground"
           type="date"
-          min={moment().format("YYYY-MM-DD")}
+          min={DateTime.now()
+            .setZone("America/Los_Angeles")
+            .startOf("day")
+            .toFormat("yyyy-MM-dd")}
           value={formData?.date}
           name="date"
           onChange={handleChange}

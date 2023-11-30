@@ -1,7 +1,6 @@
 import { formatDateAndTime } from "@/lib/formatDateTime";
 import {
   Html,
-  Head,
   Text,
   Heading,
   Preview,

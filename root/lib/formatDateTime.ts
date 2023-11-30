@@ -1,14 +1,8 @@
-import moment from "moment-timezone";
+import { DateTime } from "luxon";
 
-export const formatDateAndTime = (dateTime: string) => {
-  const dateObj = moment.tz(dateTime, "America/Los_Angeles").toDate();
-  const dateString = dateObj?.toLocaleDateString();
-
-  const timeString = dateObj?.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
+export const formatDateAndTime = (dateTime: any) => {
+  const dateString = DateTime.fromISO(dateTime).toLocal().toLocaleString();
+  const timeString = DateTime.fromISO(dateTime).toLocal().toFormat("h:mm a");
 
   return { dateString, timeString };
 };

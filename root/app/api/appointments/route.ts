@@ -7,7 +7,7 @@ import EmailConfirmation from "@/components/EmailConfirmation";
 import EmailDeletion from "@/components/EmailDeletion";
 import AdminConfirmEmail from "@/components/AdminConfirmEmail";
 import AdminDeleteEmail from "@/components/AdminDeleteEmail";
-import moment from "moment-timezone";
+import { DateTime } from "luxon";
 
 export async function GET(req: NextRequest) {
   try {
@@ -44,8 +44,14 @@ export async function GET(req: NextRequest) {
         status: true,
       },
     });
+
+    const convertedAppointments = appointments?.map((appointment) => ({
+      ...appointment,
+      dateTime: DateTime.fromJSDate(appointment?.dateTime).toUTC().toISO(),
+    }));
+
     return NextResponse.json({
-      appointments,
+      convertedAppointments,
       statusText: "OK",
       statusCode: 200,
     });
@@ -68,7 +74,6 @@ export async function POST(req: NextRequest) {
     const body: any = await req.json();
     const { id, dateTime, firstName, lastName, clientEmail, userId, status } =
       body;
-
     const userExists = await prisma.user.findUnique({
       where: { id: userId },
     });
@@ -81,7 +86,9 @@ export async function POST(req: NextRequest) {
 
     const existingAppointment = await prisma.appointment.findFirst({
       where: {
-        dateTime: moment(dateTime).toDate(),
+        dateTime: DateTime.fromISO(dateTime, {
+          zone: "America/Los_Angeles",
+        }).toJSDate(),
         userId,
         status: { in: ["available", "booked"] },
       },
@@ -94,25 +101,17 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const appointmentDateTime = moment.tz(
-      body?.dateTime,
-      "America/Los_Angeles"
-    );
-    if (
-      appointmentDateTime?.isBefore(
-        moment.tz("America/Los_Angeles").startOf("day")
-      )
-    ) {
+    const utcDateTime = DateTime.fromISO(dateTime).toUTC();
+    if (utcDateTime < DateTime.now().setZone("America/Los_Angeles")) {
       return NextResponse.json({
         statusText: "Appointment date is in the past.",
         statusCode: 400,
       });
     }
-
     const newAppointment = await prisma.appointment.create({
       data: {
         id,
-        dateTime: moment(dateTime).toDate(),
+        dateTime: utcDateTime.toJSDate(),
         firstName,
         lastName,
         clientEmail,
@@ -136,10 +135,14 @@ export async function PUT(req: NextRequest) {
     const { id, dateTime, firstName, lastName, clientEmail, userId, status } =
       body;
 
+    const utcDateTime = DateTime.fromISO(dateTime, {
+      zone: "America/Los_Angeles",
+    }).toUTC();
+
     const updatedAppointment = await prisma.appointment.update({
       where: { id },
       data: {
-        dateTime: moment(dateTime).toDate(),
+        dateTime: utcDateTime.toJSDate(),
         firstName,
         lastName,
         clientEmail,

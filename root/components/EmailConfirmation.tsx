@@ -9,10 +9,10 @@ import {
   Hr,
 } from "@react-email/components";
 
-function formatDateTimeForUrl(dateTime: any) {
-  const dateObj = new Date(dateTime);
-  return dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
-}
+// function formatDateTimeForUrl(dateTime: any) {
+//   const dateObj = new Date(dateTime);
+//   return dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
+// }
 export default function EmailConfirmation(
   clientName: string,
   dateTime: string

@@ -32,48 +32,45 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import AppointmentSkeleton from "./AppointmentSkeleton";
-import moment from "moment-timezone";
+import { DateTime } from "luxon";
 
 export default function AdminDashboard() {
   const { isLoading } = useKindeBrowserClient();
   const { data, mutate } = useSWR("/api/appointments", fetcher);
   const { toast } = useToast();
 
-  const timezone = "America/Los_Angeles";
-
   const [selectedDate, setSelectedDate] = useState(
-    moment.tz(new Date(), timezone).toDate()
+    DateTime.now().toLocal().startOf("day")
   );
 
-  const handleDateSelect = (date: any) => {
-    setSelectedDate(moment.tz(date, timezone).toDate());
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(DateTime.fromJSDate(date).toLocal().startOf("day"));
   };
 
-  const filteredAppointments = data?.appointments
+  const filteredAppointments = data?.convertedAppointments
     ?.filter((appointment: any) => {
-      const appointmentDateTime = moment
-        .tz(appointment, timezone)
-        .toDate()
-        .getTime();
-      const now = moment.tz(new Date(), timezone).toDate().getTime();
-
+      const appointmentDateTime = DateTime.fromISO(
+        appointment?.dateTime
+      ).toLocal();
       return (
-        appointmentDateTime >= now &&
-        appointment?.status === "available" &&
-        moment.tz(appointment?.dateTime, timezone).isSame(selectedDate, "day")
+        appointmentDateTime >= DateTime.now().toLocal() &&
+        appointmentDateTime?.hasSame(selectedDate, "day")
       );
     })
     .sort((a: any, b: any) => {
-      const timeA = moment.tz(a.dateTime, timezone).toDate().getTime();
-      const timeB = moment.tz(b.dateTime, timezone).toDate().getTime();
-      return timeA - timeB;
+      return (
+        DateTime.fromISO(a.dateTime).toLocal().toMillis() -
+        DateTime.fromISO(b.dateTime).toLocal().toMillis()
+      );
     });
 
-  const appointmentsByDate = data?.appointments?.filter((appointment: any) => {
-    return moment
-      .tz(appointment?.dateTime, timezone)
-      .isSame(selectedDate, "day");
-  });
+  const appointmentsByDate = data?.convertedAppointments?.filter(
+    (appointment: any) => {
+      return DateTime.fromISO(appointment?.dateTime)
+        .toLocal()
+        .hasSame(selectedDate, "day");
+    }
+  );
 
   const handleDeleteAppointment = async (appointment: any) => {
     try {
@@ -92,12 +89,13 @@ export default function AdminDashboard() {
       });
 
       const result = await res.json();
-      if (result.statusCode !== 200) {
+      if (result?.statusCode !== 200) {
         toast({
-          description: "Error deleting appointment.",
+          description: `Error deleting appointment.`,
           variant: "destructive",
         });
-      } else if (isLoading) {
+      }
+      if (isLoading) {
         toast({ description: "Deleting appointment..." });
       } else {
         toast({
@@ -116,10 +114,10 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex flex-col md:flex-row">
-      <div className="mb-4 md:mb-0 md:mr-4 rounded-md border shadow">
+      <div className="h-full mb-4 md:mb-0 md:mr-4 rounded-md border shadow">
         <CalendarComponent
-          appointments={data?.appointments}
-          selectedDate={moment.tz(selectedDate, timezone).toDate()}
+          appointments={data?.convertedAppointments}
+          selectedDate={selectedDate.toJSDate()}
           onDateSelect={handleDateSelect}
           userRole="admin"
         />
@@ -128,8 +126,8 @@ export default function AdminDashboard() {
       {isLoading ? (
         <AppointmentSkeleton />
       ) : filteredAppointments?.length > 0 ? (
-        <div className="overflow-auto mx-auto w-full">
-          <div className="mx-4">
+        <div className="mx-auto w-full">
+          <div className="m-0 px-0 py-1 overflow-scroll h-80 overscroll-contain">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -256,7 +254,10 @@ export default function AdminDashboard() {
             No available appointments on:
             <br />
             <span className="tracking-widest text-muted-foreground">
-              {moment.tz(selectedDate, timezone).format("LL")}
+              {DateTime.fromJSDate(selectedDate.toJSDate())
+                .toLocal()
+                .toJSDate()
+                .toDateString()}
             </span>
           </div>
         </div>

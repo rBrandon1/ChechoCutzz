@@ -27,7 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import moment from "moment-timezone";
+import { DateTime } from "luxon";
 
 export default function BookAppointment() {
   const { user, isLoading, isAuthenticated } = useKindeBrowserClient();
@@ -36,7 +36,13 @@ export default function BookAppointment() {
   const router = useRouter();
 
   const currentPrice = "30";
-  const timezone = "America/Los_Angeles";
+  const [selectedDate, setSelectedDate] = useState(
+    DateTime.now().toLocal().startOf("day")
+  );
+
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(DateTime.fromJSDate(date).toLocal().startOf("day"));
+  };
 
   const bookAppointment = async (appointment: any) => {
     const updatedData = {
@@ -89,36 +95,25 @@ export default function BookAppointment() {
     }
   };
 
-  const [selectedDate, setSelectedDate] = useState(
-    moment.tz(new Date(), timezone).toDate()
-  );
-  const handleDateSelect = (date: any) => {
-    setSelectedDate(moment.tz(date, timezone).toDate());
-  };
-
-  const filteredAppointments = data?.appointments
+  const filteredAppointments = data?.convertedAppointments
     ?.filter((appointment: any) => {
-      const appointmentDateTime = moment
-        .tz(appointment, timezone)
-        .toDate()
-        .getTime();
-      const now = moment.tz(new Date(), timezone).toDate().getTime();
-
+      const appointmentDateTime = DateTime.fromISO(
+        appointment?.dateTime
+      ).toLocal();
       return (
-        appointmentDateTime >= now &&
+        appointmentDateTime >= DateTime.now().toLocal() &&
         appointment?.status === "available" &&
-        moment.tz(appointment?.dateTime, timezone).isSame(selectedDate, "day")
+        appointmentDateTime?.hasSame(selectedDate, "day")
       );
     })
     .sort((a: any, b: any) => {
-      const timeA = moment.tz(a.dateTime, timezone).toDate().getTime();
-      const timeB = moment.tz(b.dateTime, timezone).toDate().getTime();
-      return timeA - timeB;
+      return (
+        DateTime.fromISO(a.dateTime).toLocal().toMillis() -
+        DateTime.fromISO(b.dateTime).toLocal().toMillis()
+      );
     });
 
-  const hasAvailableAppointments = data?.appointments?.some(
-    (appointment: any) => appointment?.status === "available"
-  );
+  const hasAvailableAppointments = filteredAppointments?.length > 0;
 
   return (
     <div>
@@ -131,102 +126,105 @@ export default function BookAppointment() {
       <div className="flex flex-col md:flex-row">
         <div className="mb-4 md:mb-0 md:mr-4 rounded-md border shadow">
           <CalendarComponent
-            appointments={data?.appointments}
-            selectedDate={selectedDate}
+            appointments={data?.convertedAppointments}
+            selectedDate={selectedDate.toJSDate()}
             onDateSelect={handleDateSelect}
           />
         </div>
-        <div className="mx-4 flex-grow">
-          {isLoading ? (
-            <AppointmentSkeleton />
-          ) : filteredAppointments?.length > 0 && hasAvailableAppointments ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-center">Date</TableHead>
-                  <TableHead className="text-center">Time</TableHead>
-                  <TableHead className="text-center">Book</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredAppointments?.map((appointment: any) => {
-                  const { dateString, timeString } = formatDateAndTime(
-                    appointment?.dateTime
-                  );
-                  return (
-                    <TableRow
-                      key={appointment?.id}
-                      className="text-center tracking-wider text-[16px]"
-                    >
-                      <TableCell>{dateString}</TableCell>
-                      <TableCell>{timeString}</TableCell>
-                      <TableCell>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button>Book</Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogTitle>
-                              Confirm appointment
-                            </AlertDialogTitle>
-                            <AlertDialogDescription asChild>
-                              <div className="inline">
-                                <div>
-                                  Please confirm that you would like to book
-                                  this appointment:
+
+        {isLoading ? (
+          <AppointmentSkeleton />
+        ) : filteredAppointments?.length > 0 && hasAvailableAppointments ? (
+          <div className="mx-auto w-full">
+            <div className="m-0 px-0 py-1 overflow-scroll overscroll-contain h-80">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-center">Date</TableHead>
+                    <TableHead className="text-center">Time</TableHead>
+                    <TableHead className="text-center">Book</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAppointments?.map((appointment: any) => {
+                    const { dateString, timeString } = formatDateAndTime(
+                      appointment?.dateTime
+                    );
+                    return (
+                      <TableRow
+                        key={appointment?.id}
+                        className="text-center tracking-wider text-[16px]"
+                      >
+                        <TableCell>{dateString}</TableCell>
+                        <TableCell>{timeString}</TableCell>
+                        <TableCell>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button>Book</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogTitle>
+                                Confirm appointment
+                              </AlertDialogTitle>
+                              <AlertDialogDescription asChild>
+                                <div className="inline">
+                                  <div>
+                                    Please confirm that you would like to book
+                                    this appointment:
+                                  </div>
+                                  <div>
+                                    Date:{" "}
+                                    <span className="font-bold tracking-widest text-primary">
+                                      {dateString}
+                                    </span>
+                                    , Time:{" "}
+                                    <span className="font-bold tracking-widest text-primary">
+                                      {timeString}
+                                    </span>
+                                  </div>
                                 </div>
-                                <div>
-                                  Date:{" "}
-                                  <span className="font-bold tracking-widest text-primary">
-                                    {dateString}
-                                  </span>
-                                  , Time:{" "}
-                                  <span className="font-bold tracking-widest text-primary">
-                                    {timeString}
-                                  </span>
-                                </div>
-                              </div>
-                            </AlertDialogDescription>
-                            <AlertDialogCancel asChild>
-                              <Button className="text-primary">Cancel</Button>
-                            </AlertDialogCancel>
-                            <AlertDialogAction asChild>
-                              <Button
-                                onClick={() => {
-                                  if (isAuthenticated) {
-                                    handleBookAppointment(appointment);
-                                  } else {
-                                    toast({
-                                      description:
-                                        "You must be signed in to book an appointment!",
-                                      variant: "destructive",
-                                    });
-                                  }
-                                }}
-                              >
-                                Confirm
-                              </Button>
-                            </AlertDialogAction>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="flex items-center justify-center md:justify-start h-full text-center">
-              <div>
-                No available appointments on:
-                <br />
-                <span className="tracking-widest text-muted-foreground">
-                  {moment.tz(selectedDate, timezone).format("LL")}
-                </span>
-              </div>
+                              </AlertDialogDescription>
+                              <AlertDialogCancel asChild>
+                                <Button className="text-primary">Cancel</Button>
+                              </AlertDialogCancel>
+                              <AlertDialogAction asChild>
+                                <Button
+                                  onClick={() => {
+                                    if (isAuthenticated) {
+                                      handleBookAppointment(appointment);
+                                    } else {
+                                      toast({
+                                        description:
+                                          "You must be signed in to book an appointment!",
+                                        variant: "destructive",
+                                      });
+                                    }
+                                  }}
+                                >
+                                  Confirm
+                                </Button>
+                              </AlertDialogAction>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center md:justify-start h-full text-center">
+            <div>
+              No available appointments on:
+              <br />
+              <span className="tracking-widest text-muted-foreground">
+                {selectedDate?.startOf("day").toJSDate().toDateString()}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
