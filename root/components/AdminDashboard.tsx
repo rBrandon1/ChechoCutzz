@@ -33,11 +33,14 @@ import { useToast } from "@/components/ui/use-toast";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import AppointmentSkeleton from "./AppointmentSkeleton";
 import { DateTime } from "luxon";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 export default function AdminDashboard() {
   const { isLoading } = useKindeBrowserClient();
   const { data, mutate } = useSWR("/api/appointments", fetcher);
   const { toast } = useToast();
+  const [newFirstName, setNewFirstName] = useState("");
 
   const [selectedDate, setSelectedDate] = useState(
     DateTime.now().toLocal().startOf("day")
@@ -112,6 +115,78 @@ export default function AdminDashboard() {
     }
   };
 
+  const markAsBooked = async (appointment: any) => {
+    try {
+      const res = await fetch("/api/appointments", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: appointment?.id,
+          dateTime: appointment?.dateTime,
+          firstName: appointment?.user?.firstName,
+          clientEmail: appointment?.user?.email,
+          status: "booked",
+        }),
+      });
+
+      const result = await res.json();
+      if (result?.statusCode !== 200) {
+        toast({
+          description: `Error with appointment.`,
+          variant: "destructive",
+        });
+      }
+      if (isLoading) {
+        toast({ description: "Changing status..." });
+      } else {
+        toast({
+          description: "Marked as booked!",
+        });
+        mutate("/api/appointments");
+      }
+      mutate("/api/appointments");
+    } catch (error: any) {
+      toast({
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleNameChange = async (appointment: any) => {
+    try {
+      const res = await fetch("/api/appointments", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: appointment?.id,
+          newFirstName: newFirstName,
+          dateTime: appointment?.dateTime,
+          clientEmail: appointment?.clientEmail,
+          userId: appointment?.userId,
+          status: appointment?.status,
+        }),
+      });
+
+      const result = await res.json();
+      if (result.statusCode !== 200) {
+        toast({
+          description: `Error updating appointment.`,
+          variant: "destructive",
+        });
+      } else {
+        toast({ description: "Appointment updated successfully!" });
+        mutate("/api/appointments");
+      }
+    } catch (error: any) {
+      toast({ description: error.message, variant: "destructive" });
+    }
+  };
+
   return (
     <div className="flex flex-col md:flex-row">
       <div className="h-full mb-4 md:mb-0 md:mr-4 rounded-md border shadow">
@@ -159,18 +234,51 @@ export default function AdminDashboard() {
                         {isBooked ? (
                           <Popover>
                             <PopoverTrigger className="underline underline-offset-2">
-                              {appointment?.user?.firstName}
+                              View
                             </PopoverTrigger>
                             <PopoverContent>
                               <div className="whitespace-normal overflow-auto">
-                                <p>
-                                  Name: {appointment?.user?.firstName}{" "}
-                                  {appointment?.user?.lastName}
-                                </p>
-                                <p>Email: {appointment?.user?.email}</p>
+                                <div className="pb-6">
+                                  <p>
+                                    Name:{" "}
+                                    {appointment?.user?.firstName !==
+                                      appointment?.firstName &&
+                                    appointment?.firstName
+                                      ? appointment?.firstName
+                                      : appointment?.user?.firstName +
+                                        " " +
+                                        appointment?.user?.lastName}
+                                  </p>
+                                  <p>Email: {appointment?.user?.email}</p>
+                                </div>
+                                <div className="grid grid-flow-col gap-2 items-center">
+                                  <Label htmlFor="newName">New name</Label>
+                                  <Input
+                                    id="newName"
+                                    type="text"
+                                    placeholder="New name"
+                                    className="w-full h-8 bg-popover"
+                                    value={newFirstName}
+                                    onChange={(e) =>
+                                      setNewFirstName(e?.target?.value)
+                                    }
+                                  />
+                                  <Button
+                                    className="h-8 flex justify-center items-center"
+                                    onClick={() =>
+                                      handleNameChange(appointment)
+                                    }
+                                  >
+                                    Update
+                                  </Button>
+                                </div>
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
-                                    <Button>Delete</Button>
+                                    <div className="pt-6">
+                                      <Button className="bg-red-500 w-full ">
+                                        Delete
+                                      </Button>
+                                    </div>
                                   </AlertDialogTrigger>
                                   <AlertDialogContent>
                                     <AlertDialogTitle>
@@ -185,7 +293,10 @@ export default function AdminDashboard() {
                                         This action cannot be undone.
                                       </span>
                                     </AlertDialogDescription>
-                                    <AlertDialogCancel asChild>
+                                    <AlertDialogCancel
+                                      asChild
+                                      className="flex justify-center items-center"
+                                    >
                                       <Button
                                         size="sm"
                                         className="text-primary"
@@ -193,13 +304,16 @@ export default function AdminDashboard() {
                                         Cancel
                                       </Button>
                                     </AlertDialogCancel>
-                                    <AlertDialogAction asChild>
+                                    <AlertDialogAction
+                                      asChild
+                                      className="w-full bg-red-500"
+                                    >
                                       <Button
-                                        onClick={() => {
-                                          handleDeleteAppointment(appointment);
-                                        }}
+                                        onClick={() =>
+                                          handleDeleteAppointment(appointment)
+                                        }
                                       >
-                                        Confirm
+                                        Delete
                                       </Button>
                                     </AlertDialogAction>
                                   </AlertDialogContent>
@@ -210,33 +324,49 @@ export default function AdminDashboard() {
                         ) : (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button>Delete</Button>
+                              <Button>Edit</Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogTitle>
-                                Confirm deletion
+                                Edit Appointment
                               </AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete this appoinment?
+                                Would you like to delete or mark this appoinment
+                                as booked?
                                 <br />
                                 <span className="text-red-500">
                                   This action cannot be undone.
                                 </span>
                               </AlertDialogDescription>
-                              <AlertDialogCancel asChild>
+                              <AlertDialogCancel
+                                asChild
+                                className="flex items-center justify-center"
+                              >
                                 <Button size="sm" className="text-primary">
                                   Cancel
                                 </Button>
                               </AlertDialogCancel>
-                              <AlertDialogAction asChild>
-                                <Button
-                                  onClick={() => {
-                                    handleDeleteAppointment(appointment);
-                                  }}
+                              <div className="flex justify-between gap-4 items-center">
+                                <AlertDialogAction
+                                  asChild
+                                  className="w-full bg-red-500"
                                 >
-                                  Confirm
-                                </Button>
-                              </AlertDialogAction>
+                                  <Button
+                                    onClick={() =>
+                                      handleDeleteAppointment(appointment)
+                                    }
+                                  >
+                                    Delete
+                                  </Button>
+                                </AlertDialogAction>
+                                <AlertDialogAction asChild className="w-full">
+                                  <Button
+                                    onClick={() => markAsBooked(appointment)}
+                                  >
+                                    Mark as booked
+                                  </Button>
+                                </AlertDialogAction>
+                              </div>
                             </AlertDialogContent>
                           </AlertDialog>
                         )}

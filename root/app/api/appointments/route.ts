@@ -134,8 +134,16 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body: any = await req.json();
-    const { id, dateTime, firstName, lastName, clientEmail, userId, status } =
-      body;
+    const {
+      id,
+      dateTime,
+      firstName,
+      lastName,
+      clientEmail,
+      userId,
+      status,
+      newFirstName,
+    } = body;
 
     const utcDateTime = DateTime.fromISO(dateTime, {
       zone: "America/Los_Angeles",
@@ -152,6 +160,20 @@ export async function PUT(req: NextRequest) {
         status,
       },
     });
+
+    if (newFirstName) {
+      await prisma.appointment.update({
+        where: { id },
+        data: {
+          firstName: newFirstName,
+          lastName: "",
+          dateTime,
+          clientEmail,
+          userId,
+          status,
+        },
+      });
+    }
 
     const transporter = nodemailer.createTransport({
       host: "smtp.zoho.com",
