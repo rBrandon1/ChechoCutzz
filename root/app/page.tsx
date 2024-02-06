@@ -15,27 +15,26 @@ import "swiper/css/autoplay";
 import { createSupabase } from "@/lib/supabase/server";
 import prisma from "@/prisma/client";
 
-export async function getData({ req, res }: any) {
-  const supabase = createSupabase(req);
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+// export async function getData({ req, res }: any) {
+//   const supabase = createSupabase(req);
+//   const {
+//     data: { session },
+//   } = await supabase.auth.getSession();
 
-  let userRole: string | undefined = "";
-  if (session) {
-    const user = await prisma.user.findUnique({
-      where: { id: session?.user?.id },
-    });
-    userRole = user?.role;
-    console.log("ROLELLE: ", userRole);
-  }
+//   let userRole: string | undefined = "";
+//   if (session) {
+//     const user = await prisma.user.findUnique({
+//       where: { id: session?.user?.id },
+//     });
+//     userRole = user?.role;
+//   }
 
-  return {
-    props: {
-      userRole,
-    },
-  };
-}
+//   return {
+//     props: {
+//       userRole,
+//     },
+//   };
+// }
 
 export default function Home() {
   const Images = [1, 2, 3, 4, 5, 6];
