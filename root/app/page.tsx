@@ -1,9 +1,8 @@
 "use client";
 
 import "./globals.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { Button } from "@/components/ui/button";
 import { InstagramLogoIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
@@ -13,41 +12,32 @@ import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/autoplay";
-import { roleCheck } from "@/lib/roleCheck";
+import { createSupabase } from "@/lib/supabase/server";
+import prisma from "@/prisma/client";
+
+export async function getData({ req, res }: any) {
+  const supabase = createSupabase(req);
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  let userRole: string | undefined = "";
+  if (session) {
+    const user = await prisma.user.findUnique({
+      where: { id: session?.user?.id },
+    });
+    userRole = user?.role;
+    console.log("ROLELLE: ", userRole);
+  }
+
+  return {
+    props: {
+      userRole,
+    },
+  };
+}
 
 export default function Home() {
-  const { user, permissions } = useKindeBrowserClient();
-  const userRole = roleCheck(permissions);
-
-  const createUser = async (userData: any) => {
-    try {
-      const res = await fetch("/api/users", {
-        method: "POST",
-        body: JSON.stringify(userData),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!res.ok) throw new Error("Failed to create data.");
-      return await res.json();
-    } catch (e) {
-      throw new Error("Error" + e);
-    }
-  };
-
-  useEffect(() => {
-    if (user) {
-      const userData = {
-        id: user?.id,
-        email: user?.email,
-        firstName: user?.given_name,
-        lastName: user?.family_name,
-        role: userRole,
-      };
-      createUser(userData);
-    }
-  }, [user, permissions]);
-
   const Images = [1, 2, 3, 4, 5, 6];
   const [loadingStates, setLoadingStates] = useState<Record<number, boolean>>(
     Images.reduce((acc, img) => ({ ...acc, [img]: true }), {})

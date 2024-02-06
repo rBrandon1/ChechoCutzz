@@ -1,6 +1,5 @@
 "use client";
 
-import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import useSWR from "swr";
@@ -17,10 +16,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import useAuth from "@/lib/useAuth";
 
 export default function CreateAppointments() {
   const { mutate } = useSWR("/api/appointments", fetcher);
-  const { user, isLoading } = useKindeBrowserClient();
+  const { user, isLoading } = useAuth();
   const [formData, setFormData] = useState({
     date: "",
     firstName: "",

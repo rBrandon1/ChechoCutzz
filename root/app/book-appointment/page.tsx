@@ -1,7 +1,6 @@
 "use client";
 
 import { fetcher } from "@/lib/fetcher";
-import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { formatDateAndTime } from "@/lib/formatDateTime";
 import { useToast } from "@/components/ui/use-toast";
 import useSWR from "swr";
@@ -28,10 +27,11 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { DateTime } from "luxon";
+import useAuth from "@/lib/useAuth";
 
 export default function BookAppointment() {
-  const { user, isLoading, isAuthenticated } = useKindeBrowserClient();
   const { data, mutate } = useSWR("/api/appointments", fetcher);
+  const { user, isLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -45,11 +45,13 @@ export default function BookAppointment() {
   };
 
   const bookAppointment = async (appointment: any) => {
+    let firstName: string = user?.user_metadata?.name.split(" ")[0] || "User";
+    let lastName: string = user?.user_metadata?.name.split(" ")[1] || "";
     const updatedData = {
       id: appointment?.id,
       userId: user?.id,
-      firstName: user?.given_name,
-      lastName: user?.family_name,
+      firstName,
+      lastName,
       dateTime: appointment?.dateTime,
       clientEmail: user?.email,
       status: "booked",

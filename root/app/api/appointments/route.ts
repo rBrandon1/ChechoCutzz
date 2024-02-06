@@ -1,4 +1,3 @@
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { render } from "@react-email/components";
 import prisma from "@/prisma/client";
@@ -13,23 +12,22 @@ import AdminCancelEmail from "@/components/AdminCancelEmail";
 
 export async function GET(req: NextRequest) {
   try {
-    const { getAccessToken } = getKindeServerSession();
-    const accessToken: any = await getAccessToken();
     let appointments;
+    //! viewable by the user
 
-    if (!accessToken?.permissions?.includes("admin")) {
-      appointments = await prisma.appointment.findMany({
-        where: {
-          userId: accessToken?.sub,
-          status: "booked",
-        },
-        select: {
-          id: true,
-          dateTime: true,
-          status: true,
-        },
-      });
-    }
+    // appointments = await prisma.appointment.findMany({
+    //   where: {
+    //     userId: accessToken?.sub,
+    //     status: "booked",
+    //   },
+    //   select: {
+    //     id: true,
+    //     dateTime: true,
+    //     status: true,
+    //   },
+    // });
+
+    //! viewable by the admin
     const { searchParams } = new URL(req.nextUrl);
     const userId = searchParams.get("userId");
     let query = userId && { where: { userId } };
@@ -67,11 +65,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { getAccessToken } = getKindeServerSession();
-    const accessToken: any = await getAccessToken();
-    if (!accessToken?.permissions?.includes("admin")) {
-      return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
-    }
+    // 403 forbidden if user is not an admin
 
     const body: any = await req.json();
     const { id, dateTime, firstName, lastName, clientEmail, userId, status } =
@@ -227,9 +221,6 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const { getAccessToken } = getKindeServerSession();
-  const accessToken: any = await getAccessToken();
-
   try {
     const body: any = await req.json();
     const {
@@ -255,7 +246,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ statusText: "Missing id", statusCode: 400 });
     }
 
-    if (initiatedByUser && !accessToken?.permissions?.includes("admin")) {
+    if (initiatedByUser) {
       const appointmentToUpdate = await prisma.appointment.findUnique({
         where: { id },
       });
@@ -306,9 +297,7 @@ export async function DELETE(req: NextRequest) {
       });
     }
 
-    if (!accessToken?.permissions?.includes("admin")) {
-      return NextResponse.json({ statusText: "Forbidden", statusCode: 403 });
-    }
+    // return 403 if user is not an admin
 
     const appointmentToDelete = await prisma.appointment.findUnique({
       where: { id },

@@ -1,14 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider          = "mysql"
-  url               = env("DATABASE_URL")
-  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -28,6 +24,6 @@ model Appointment {
   lastName    String
   clientEmail String
   userId      String?
-  user        User?    @relation(fields: [userId], references: [id]) // known as a foreign key
   status      String
+  user        User?    @relation(fields: [userId], references: [id])
 }

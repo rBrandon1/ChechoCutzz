@@ -30,18 +30,17 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import AppointmentSkeleton from "./AppointmentSkeleton";
 import { DateTime } from "luxon";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import useAuth from "@/lib/useAuth";
 
 export default function AdminDashboard() {
-  const { isLoading } = useKindeBrowserClient();
   const { data, mutate } = useSWR("/api/appointments", fetcher);
   const { toast } = useToast();
   const [newFirstName, setNewFirstName] = useState("");
-
+  const { isLoading } = useAuth();
   const [selectedDate, setSelectedDate] = useState(
     DateTime.now().toLocal().startOf("day")
   );

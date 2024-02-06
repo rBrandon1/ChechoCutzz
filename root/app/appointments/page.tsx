@@ -24,13 +24,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import Link from "next/link";
-import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { DateTime } from "luxon";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
+import useAuth from "@/lib/useAuth";
 
 export default function UserAppointments() {
-  const { user, isLoading } = useKindeBrowserClient();
+  const { user, isLoading } = useAuth();
   const { data: appointmentsData, mutate } = useSWR(
     user ? `/api/appointments?userId=${user?.id}` : null,
     fetcher
