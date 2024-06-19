@@ -1,8 +1,8 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import RegisterForm from "./RegisterForm";
 import SignInForm from "./SignInForm";
+import SignUpForm from "./SignUpForm";
 
 export function AuthForm() {
   return (
@@ -16,7 +16,7 @@ export function AuthForm() {
           <SignInForm />
         </TabsContent>
         <TabsContent value="signup">
-          <RegisterForm />
+          <SignUpForm />
         </TabsContent>
       </Tabs>
     </div>

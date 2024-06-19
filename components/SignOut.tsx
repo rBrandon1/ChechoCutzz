@@ -1,18 +1,28 @@
-import createServerSupabaseClient from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import React from "react";
+"use client";
 import { Button } from "./ui/button";
 
 export default function SignOut() {
   const signOut = async () => {
-    "use server";
-    const supabase = await createServerSupabaseClient();
-    await supabase.auth.signOut();
-    redirect("/auth-server-action");
+    const response = await fetch("/api/auth/signout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    try {
+      if (response.redirected) {
+        window.location.href = response.url;
+      } else {
+        console.error("Failed to sign out: ", response.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred while siging out", error);
+    }
   };
+
   return (
     <form action={signOut}>
-      <Button>Sign out</Button>
+      <Button variant="destructive">Sign out</Button>
     </form>
   );
 }

@@ -16,11 +16,10 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { useTransition } from "react";
-import { signInWithEmailAndPassword } from "../actions";
 
 const FormSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(1, {
+  password: z.string().min(6, {
     message: "Password is required.",
   }),
 });
@@ -36,31 +35,38 @@ export default function SignInForm() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
     startTransition(async () => {
-      const result = await signInWithEmailAndPassword(data);
-      const { error } = JSON.parse(result);
-
-      if (error?.message) {
-        toast({
-          title: "You submitted the following values:",
-          variant: "destructive",
-          description: (
-            <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-              <code className="text-white">
-                {JSON.stringify(data, null, 2)}
-              </code>
-            </pre>
-          ),
+      try {
+        const response = await fetch("/api/auth/signin", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         });
-      } else {
+
+        if (response.ok) {
+          const { user } = await response.json();
+          toast({
+            title: "Successfully signed in.",
+            description: `Welcome, ${user.firstName}!`,
+          });
+          window.location.href = response.headers.get("Location") || "/";
+        } else {
+          const { error } = await response.json();
+          toast({
+            title: "Sign in failed.",
+            variant: "destructive",
+            description: error,
+          });
+        }
+      } catch (error) {
+        console.log(error);
         toast({
-          title: "You submitted the following values:",
-          description: (
-            <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-              <code className="text-white">Successfully signed in.</code>
-            </pre>
-          ),
+          title: "Sign in failed.",
+          variant: "destructive",
+          description: "An unexpected error occurred.",
         });
       }
     });
@@ -101,7 +107,6 @@ export default function SignInForm() {
                   onChange={field.onChange}
                 />
               </FormControl>
-
               <FormMessage />
             </FormItem>
           )}

@@ -6,7 +6,6 @@ import * as z from "zod";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { useTransition } from "react";
-import { signUpWithEmailAndPassword } from "../actions";
 
 const FormSchema = z
   .object({
@@ -26,7 +24,7 @@ const FormSchema = z
     firstName: z.string().min(1),
     lastName: z.string().min(1),
     role: z.literal("user"),
-    picture: z.string().optional(),
+    picture: z.string().optional().default(""),
     password: z.string().min(6, {
       message: "Password is required.",
     }),
@@ -38,7 +36,8 @@ const FormSchema = z
     message: "Password did not match",
     path: ["confirm"],
   });
-export default function RegisterForm() {
+
+export default function SignUpForm() {
   const [isLoading, startTransition] = useTransition();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -48,31 +47,43 @@ export default function RegisterForm() {
       lastName: "",
       password: "",
       confirm: "",
+      role: "user",
+      picture: "",
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
     startTransition(async () => {
-      const result = await signUpWithEmailAndPassword(data);
-
-      const { error } = JSON.parse(result);
-
-      if (error?.message) {
-        toast({
-          title: "You submitted the following values:",
-          variant: "destructive",
-          description: (
-            <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-              <code className="text-white">
-                {JSON.stringify(data, null, 2)}
-              </code>
-            </pre>
-          ),
+      try {
+        const response = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         });
-      } else {
+
+        if (response.ok) {
+          const { user } = await response.json();
+          toast({
+            title: "Successfully signed up.",
+            description: `Welcome, ${user.firstName}!`,
+          });
+          window.location.href = response.headers.get("Location") || "/";
+        } else {
+          const { error } = await response.json();
+          toast({
+            title: "Signup failed.",
+            variant: "destructive",
+            description: error,
+          });
+        }
+      } catch (error) {
+        console.log({ error });
         toast({
-          title: "You submitted the following values:",
-          description: "Successfully signed up.",
+          title: "Signup failed.",
+          variant: "destructive",
+          description: "An unexpected error occurred.",
         });
       }
     });
