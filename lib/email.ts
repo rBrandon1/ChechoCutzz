@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.NEXT_PUBLIC_RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendEmail(to: string, subject: string, html: string) {
   try {
@@ -10,8 +10,7 @@ export async function sendEmail(to: string, subject: string, html: string) {
       subject,
       html,
     });
-    console.log("Email sent successfully:", data);
-  } catch (error) {
-    console.error("Error sending email:", error);
+  } catch (error: any) {
+    throw new Error(`Error sending email: ${error.message}`);
   }
 }
