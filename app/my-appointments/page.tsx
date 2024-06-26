@@ -37,7 +37,6 @@ export default function MyAppointments() {
       const data = await res.json();
       setAppointments(data.appointments);
     } catch (error: any) {
-      console.log("Error fetching appointments:", error.message);
       toast({
         description: "Failed to load appointments. Please try again.",
         variant: "destructive",
@@ -64,7 +63,6 @@ export default function MyAppointments() {
       });
       fetchAppointments();
     } catch (error) {
-      console.error("Error cancelling appointment:", error);
       toast({
         description: "Failed to cancel appointment. Please try again.",
         variant: "destructive",

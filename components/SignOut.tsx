@@ -13,10 +13,10 @@ export default function SignOut() {
       if (response.redirected) {
         window.location.href = response.url;
       } else {
-        console.error("Failed to sign out: ", response.statusText);
+        throw new Error("Failed to sign out");
       }
-    } catch (error) {
-      console.error("An error occurred while siging out", error);
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   };
 

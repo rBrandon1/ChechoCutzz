@@ -44,7 +44,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ user: prismaUser }, { status: 201 });
   } catch (error: any) {
-    console.error("Error creating user:", error);
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }

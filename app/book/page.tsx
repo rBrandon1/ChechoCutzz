@@ -61,13 +61,11 @@ export default function BookAppointment() {
         });
 
         if (!userRes.ok) {
-          console.log(userRes.statusText);
           throw new Error("Failed to fetch user data");
         }
         const userData = await userRes.json();
         setUser(userData.user);
       } catch (error: any) {
-        console.log("Error fetching data:", error.message);
         toast({
           description: "Failed to load data. Please try again.",
           variant: "destructive",
@@ -91,7 +89,6 @@ export default function BookAppointment() {
         const { price } = await res.json();
         setCurrentPrice(price);
       } catch (error: any) {
-        console.error("Error fetching price:", error.message);
         toast({
           description: "Failed to fetch price",
           variant: "destructive",
@@ -140,7 +137,6 @@ export default function BookAppointment() {
 
       return responseData.appointment;
     } catch (error) {
-      console.error("Error in bookAppointment:", error);
       throw error;
     }
   };

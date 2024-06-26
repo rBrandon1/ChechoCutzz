@@ -7,7 +7,6 @@ export async function GET() {
     const price = await prisma.price.findFirst();
     return NextResponse.json({ price: price?.amount || 0 });
   } catch (error) {
-    console.error("(SERVER)Error fetching price:", error);
     return NextResponse.json(
       { error: "Error fetching price" },
       { status: 500 }
@@ -40,7 +39,6 @@ export async function PUT(request: NextRequest) {
     });
     return NextResponse.json({ price: updatedPrice.amount });
   } catch (error) {
-    console.error("Error updating price:", error);
     return NextResponse.json(
       { error: "Error updating price" },
       { status: 500 }

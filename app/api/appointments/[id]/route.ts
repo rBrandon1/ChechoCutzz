@@ -1,5 +1,5 @@
 "use server";
-import { sendEmail } from "@/lib/email";
+import { sendAdminNotification, sendEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import createServerSupabaseClient from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
@@ -71,9 +71,18 @@ export async function PUT(
     const date = new Date(appointment.dateTime).toLocaleDateString();
     const time = new Date(appointment.dateTime).toLocaleTimeString();
     await sendEmail(
-      session.user.email!,
+      clientEmail!,
       "Appointment Confirmation",
       `Your appointment for ${date} at ${time} has been confirmed. View your appointments <a href="https://chechocutzz.com/my-appointments">here</a>.`
+    );
+    await sendAdminNotification(
+      "New Appointment Booked",
+      `A new appointment has been booked:
+      <br>Name: ${firstName} ${lastName}
+      <br>Email: ${clientEmail}
+      <br>Date: ${date}
+      <br>Time: ${time}
+      <br><a href="https://chechocutzz.com/admin">View in Admin Dashboard</a>`
     );
 
     return NextResponse.json(
@@ -81,7 +90,6 @@ export async function PUT(
       { status: 200 }
     );
   } catch (error: any) {
-    console.log("Error updating appointment:", error.message);
     return NextResponse.json(
       { error: "Error updating appointment" },
       { status: 500 }
@@ -148,7 +156,6 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error: any) {
-    console.error("Error deleting appointment:", error);
     return NextResponse.json(
       { error: "Error deleting appointment", details: error.message },
       { status: 500 }

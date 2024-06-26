@@ -72,7 +72,6 @@ export default function SignInForm() {
         });
       }
     } catch (error) {
-      console.error("Unexpected error during sign in:", error);
       toast({
         title: "Sign in failed.",
         variant: "destructive",
