@@ -54,6 +54,9 @@ export default function CreateAppointments() {
     e?.preventDefault();
     setIsSubmitting(true);
 
+    let successCount = 0;
+    let errorCount = 0;
+
     for (const time of times) {
       const dateTime = DateTime.fromISO(`${formData.date}T${time}`, {
         zone: "America/Los_Angeles",
@@ -64,7 +67,7 @@ export default function CreateAppointments() {
       };
 
       try {
-        const res = await fetch("/api/appointments", {
+        const res = await fetch("/api/appointments/create", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -74,21 +77,28 @@ export default function CreateAppointments() {
 
         const result = await res.json();
         if (!res.ok) {
-          toast({ description: "Error creating appointment." });
-          break;
-        } else if (result?.statusText === "Duplicate appointment exists.") {
-          toast({
-            description:
-              "An appointment already exists at this exact date and time.",
-            variant: "destructive",
-          });
-          break;
-        } else if (result?.statusText === "Appointment date is in the past") {
-          toast({
-            description:
-              "Appointment date is in the past. Please select a future date.",
-            variant: "destructive",
-          });
+          if (res.status === 409) {
+            errorCount++;
+            toast({
+              description: `An appointment already exists at ${time}.`,
+              variant: "destructive",
+            });
+          } else if (result.error === "Appointment date is in the past.") {
+            errorCount++;
+            toast({
+              description:
+                "Appointment date is in the past. Please select a future date.",
+              variant: "destructive",
+            });
+          } else {
+            errorCount++;
+            toast({
+              description: "Error creating appointment.",
+              variant: "destructive",
+            });
+          }
+        } else {
+          successCount++;
         }
       } catch (error: any) {
         toast({
@@ -170,7 +180,9 @@ export default function CreateAppointments() {
             </Button>
           </AlertDialogCancel>
           <AlertDialogAction asChild>
-            <Button onClick={handleDialogSubmit}>Proceed</Button>
+            <Button className="text-secondary" onClick={handleDialogSubmit}>
+              Proceed
+            </Button>
           </AlertDialogAction>
         </AlertDialogContent>
       </AlertDialog>

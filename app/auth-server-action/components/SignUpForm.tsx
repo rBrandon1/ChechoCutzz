@@ -20,7 +20,18 @@ import { useTransition } from "react";
 
 const FormSchema = z
   .object({
-    email: z.string().email(),
+    email: z
+      .string()
+      .email()
+      .refine(
+        (email) =>
+          /^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outlook|hotmail)\.(com|net|org)$/.test(
+            email
+          ),
+        {
+          message: "Email must have a valid domain.",
+        }
+      ),
     firstName: z.string().min(1),
     lastName: z.string().min(1),
     role: z.literal("user"),
@@ -79,7 +90,6 @@ export default function SignUpForm() {
           });
         }
       } catch (error) {
-        console.log({ error });
         toast({
           title: "Signup failed.",
           variant: "destructive",
@@ -191,7 +201,7 @@ export default function SignUpForm() {
         />
         <Button
           type="submit"
-          className="w-full flex gap-2"
+          className="w-full flex gap-2 text-secondary"
           disabled={isLoading}
         >
           Sign up

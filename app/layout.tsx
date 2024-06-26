@@ -33,7 +33,7 @@ export const playfair = Playfair_Display({
   variable: "--font-sans",
 });
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -46,7 +46,7 @@ export default async function RootLayout({
           <main className="flex-grow">{children}</main>
           <Toaster />
         </div>
-        <footer className=" border-t my-6 p-4 w-full text-center">
+        <footer className="border-t my-6 p-4 w-full text-center">
           <div className="relative -bottom-px">
             <Link
               href="https://brandnramirez.com"

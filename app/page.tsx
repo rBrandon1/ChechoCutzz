@@ -37,16 +37,15 @@ export default function Home() {
         <Meteors className="z-0" number={300} />
       </div>
       <div className="mt-8 mb-10 md:mb-0 z-10">
-        <div className="font-bold text-4xl mb-5">
-          <span className="flex items-center">
-            <h1 className="italic">Gallery</h1>
+        <div className="text-4xl mb-5 flex gap-4">
+          <span className="italic items-center">Gallery</span>
+          <span className="flex items-end">
             <a
               href="https://www.instagram.com/checho.cutzz/"
               target="_blank"
               rel="noreferrer"
-              className="ml-5"
             >
-              <InstagramLogoIcon className="h-8 w-8 text-[rgb(230,50,105)]" />
+              <InstagramLogoIcon className="h-9 w-9 text-[rgb(230,50,105)]" />
             </a>
           </span>
         </div>

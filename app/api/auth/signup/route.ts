@@ -1,59 +1,50 @@
 "use server";
+import { prisma } from "@/lib/prisma";
 import createServerSupabaseClient from "@/lib/supabase/server";
-import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 import { NextRequest, NextResponse } from "next/server";
-
-const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   const { email, password, firstName, lastName, role, picture } =
     await request.json();
 
-  const supabase = await createServerSupabaseClient();
-
-  const result = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        firstName,
-        lastName,
-        role,
-        picture,
-      },
-    },
-  });
-
-  if (result.error) {
-    return NextResponse.json({ error: result.error.message }, { status: 400 });
-  }
-
   try {
-    const user = await prisma.user.create({
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const supabase = await createServerSupabaseClient();
+
+    // Create user in Supabase
+    const { data: supabaseUser, error: supabaseError } =
+      await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+          },
+        },
+      });
+
+    if (supabaseError) throw supabaseError;
+
+    // Create user in Prisma
+    const prismaUser = await prisma.user.create({
       data: {
-        id: result.data.user?.id!,
+        id: supabaseUser.user!.id,
         email,
         firstName,
         lastName,
-        password,
+        password: hashedPassword,
         role,
         picture: picture ?? "",
       },
     });
-    return NextResponse.json(
-      { user },
-      {
-        status: 200,
-        headers: {
-          Location: "/",
-        },
-      }
-    );
-  } catch (error) {
-    console.log("Error creating user in Prisma:", error);
-    return NextResponse.json(
-      { error: "Error creating user in database" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ user: prismaUser }, { status: 201 });
+  } catch (error: any) {
+    console.error("Error creating user:", error);
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }

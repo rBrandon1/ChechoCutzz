@@ -8,7 +8,7 @@ export default async function page() {
   if (data.session) return redirect("/");
 
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex justify-center items-center mt-10">
       <div className="w-96">
         <AuthForm />
       </div>

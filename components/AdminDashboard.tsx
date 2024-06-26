@@ -42,8 +42,8 @@ export default function AdminDashboard() {
   );
 
   const [convertedAppointments, setConvertedAppointments] = useState([]);
-  useEffect(() => {
-    const fetchAppointments = async () => {
+  const fetchAppointments = async () => {
+    try {
       const res = await fetch("/api/appointments", {
         cache: "no-store",
         method: "GET",
@@ -57,8 +57,15 @@ export default function AdminDashboard() {
       }));
 
       setConvertedAppointments(mappedAppointments);
-    };
+    } catch (error) {
+      toast({
+        description: "Failed to load appointments. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
+  useEffect(() => {
     fetchAppointments();
   }, []);
 
@@ -97,6 +104,10 @@ export default function AdminDashboard() {
     try {
       const res = await fetch(`/api/appointments/${appointment.id}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: appointment.id }),
       });
 
       if (!res.ok) {
@@ -108,7 +119,7 @@ export default function AdminDashboard() {
         toast({
           description: "Appointment deleted.",
         });
-        // Refresh appointments data after deletion
+        await fetchAppointments();
         router.refresh();
       }
     } catch (error: any) {
@@ -147,18 +158,23 @@ export default function AdminDashboard() {
         description: error.message,
         variant: "destructive",
       });
+      await fetchAppointments();
+      router.refresh();
     }
   };
 
   const handleNameChange = async (appointment: any) => {
     try {
+      const [firstName, lastName = ""] = newFirstName.split(" ");
+
       const res = await fetch(`api/appointments/${appointment.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          firstName: newFirstName,
+          firstName,
+          lastName: lastName || "",
         }),
       });
 
@@ -169,6 +185,7 @@ export default function AdminDashboard() {
         });
       } else {
         toast({ description: "Appointment updated successfully!" });
+        await fetchAppointments();
         router.refresh();
       }
     } catch (error: any) {
@@ -178,7 +195,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex flex-col md:flex-row">
-      <div className="h-full mb-4 md:mb-0 md:mr-4 rounded-md border shadow">
+      <div className="flex justify-center h-full mb-4 md:mb-0 md:mr-4 rounded-md border shadow">
         <CalendarComponent
           appointments={convertedAppointments}
           selectedDate={selectedDate.toJSDate()}
@@ -190,8 +207,8 @@ export default function AdminDashboard() {
       {!convertedAppointments ? (
         <AppointmentSkeleton />
       ) : filteredAppointments?.length > 0 ? (
-        <div className="mx-auto w-full">
-          <div className="m-0 px-0 py-1 overflow-scroll h-80 overscroll-contain">
+        <div className="flex justify-center mx-auto w-full">
+          <div className="m-0 px-0 pt-1 pb-5 overflow-scroll h-auto overscroll-contain">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -206,7 +223,7 @@ export default function AdminDashboard() {
                   const { dateString, timeString } = formatDateAndTime(
                     appointment?.dateTime
                   );
-                  const isBooked = appointment?.status === "booked";
+                  const isBooked = appointment.status === "booked";
 
                   return (
                     <TableRow key={appointment?.id} className="text-center ">
@@ -228,17 +245,24 @@ export default function AdminDashboard() {
                             <PopoverContent>
                               <div className="whitespace-normal overflow-auto">
                                 <div className="pb-6">
-                                  <p>
-                                    Name:{" "}
-                                    {appointment?.user?.firstName !==
-                                      appointment?.firstName &&
-                                    appointment?.firstName
-                                      ? appointment?.firstName
-                                      : appointment?.user?.firstName +
-                                        " " +
-                                        appointment?.user?.lastName}
-                                  </p>
-                                  <p>Email: {appointment?.user?.email}</p>
+                                  <div>
+                                    <span className="text-md text-slate-500">
+                                      Name:{" "}
+                                    </span>
+                                    <span className="text-sm">
+                                      {appointment.firstName}{" "}
+                                      {appointment.lastName}
+                                    </span>
+                                  </div>
+
+                                  <div>
+                                    <span className="text-md text-slate-500">
+                                      Email:{" "}
+                                    </span>
+                                    <span className="text-sm">
+                                      {appointment.clientEmail}
+                                    </span>
+                                  </div>
                                 </div>
                                 <div className="grid grid-flow-col gap-2 items-center">
                                   <Label htmlFor="newName">New name</Label>
@@ -253,7 +277,7 @@ export default function AdminDashboard() {
                                     }
                                   />
                                   <Button
-                                    className="h-8 flex justify-center items-center"
+                                    className="h-8 flex justify-center items-center text-secondary"
                                     onClick={() =>
                                       handleNameChange(appointment)
                                     }
@@ -299,7 +323,9 @@ export default function AdminDashboard() {
                                     >
                                       <Button
                                         onClick={() =>
-                                          handleDeleteAppointment(appointment)
+                                          handleDeleteAppointment(
+                                            appointment.id
+                                          )
                                         }
                                       >
                                         Delete
@@ -313,7 +339,7 @@ export default function AdminDashboard() {
                         ) : (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button>Edit</Button>
+                              <Button className="text-black">Edit</Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogTitle>
@@ -351,6 +377,7 @@ export default function AdminDashboard() {
                                 <AlertDialogAction asChild className="w-full">
                                   <Button
                                     onClick={() => markAsBooked(appointment)}
+                                    className="text-black"
                                   >
                                     Mark as booked
                                   </Button>

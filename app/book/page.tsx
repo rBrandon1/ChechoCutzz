@@ -27,36 +27,80 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function BookAppointment() {
+  const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
   const router = useRouter();
 
-  const currentPrice = "30";
   const [selectedDate, setSelectedDate] = useState(
     DateTime.now().toLocal().startOf("day")
   );
   const [appointments, setAppointments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPrice, setCurrentPrice] = useState<string>("");
 
   useEffect(() => {
     const fetchAppointments = async () => {
       setIsLoading(true);
-      const res = await fetch("/api/appointments", {
-        cache: "no-store",
-        method: "GET",
-      });
+      try {
+        const res = await fetch("/api/appointments", {
+          cache: "no-store",
+          method: "GET",
+        });
 
-      const { appointments } = await res.json();
+        const { appointments } = await res.json();
 
-      const convertedAppointments = appointments?.map((appointment: any) => ({
-        ...appointment,
-        dateTime: DateTime.fromISO(appointment.dateTime).toISO(),
-      }));
+        const convertedAppointments = appointments?.map((appointment: any) => ({
+          ...appointment,
+          dateTime: DateTime.fromISO(appointment.dateTime).toISO(),
+        }));
+        setAppointments(convertedAppointments);
 
-      setAppointments(convertedAppointments);
-      setIsLoading(false);
+        const userRes = await fetch("/api/users/current", {
+          cache: "no-store",
+          method: "GET",
+        });
+
+        if (!userRes.ok) {
+          console.log(userRes.statusText);
+          throw new Error("Failed to fetch user data");
+        }
+        const userData = await userRes.json();
+        setUser(userData.user);
+      } catch (error: any) {
+        console.log("Error fetching data:", error.message);
+        toast({
+          description: "Failed to load data. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const fetchPrice = async () => {
+      try {
+        const res = await fetch("/api/price", {
+          cache: "no-store",
+          method: "GET",
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch price");
+        }
+
+        const { price } = await res.json();
+        setCurrentPrice(price);
+      } catch (error: any) {
+        console.error("Error fetching price:", error.message);
+        toast({
+          description: "Failed to fetch price",
+          variant: "destructive",
+        });
+      }
     };
 
     fetchAppointments();
+    fetchPrice();
   }, []);
 
   const handleDateSelect = (date: Date) => {
@@ -66,36 +110,54 @@ export default function BookAppointment() {
   };
 
   const bookAppointment = async (appointment: any) => {
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
     const updatedData = {
-      id: appointment?.id,
-      dateTime: appointment?.dateTime,
-      clientEmail: appointment?.clientEmail,
+      id: appointment.id,
+      dateTime: appointment.dateTime,
+      clientEmail: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
       status: "booked",
     };
 
-    const res = await fetch(`/api/appointments/${appointment.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedData),
-    });
+    try {
+      const res = await fetch(`/api/appointments/${appointment.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+      });
 
-    if (!res.ok) {
-      throw new Error("Something went wrong!");
+      const responseData = await res.json();
+
+      if (!res.ok) {
+        throw new Error(responseData.error || "Failed to book appointment");
+      }
+
+      return responseData.appointment;
+    } catch (error) {
+      console.error("Error in bookAppointment:", error);
+      throw error;
     }
-
-    setAppointments((prevAppointments) =>
-      prevAppointments.map((app: any) =>
-        app?.id === appointment?.id ? { ...app, ...updatedData } : app
-      )
-    );
   };
 
   const handleBookAppointment = async (appointment: any) => {
+    if (!user) {
+      toast({
+        description: "Please sign in to book an appointment.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       description: "Booking appointment...",
     });
+
     try {
       await bookAppointment(appointment);
       toast({
@@ -132,7 +194,7 @@ export default function BookAppointment() {
 
   return (
     <div>
-      <h1 className="text-4xl italic font-bold mb-5">Book an Appointment</h1>
+      <h1 className="text-4xl italic mb-5">Book an Appointment</h1>
       <div className="mb-5">
         <h2 className="text-lg">
           Haircut Price - ${isLoading ? "..." : currentPrice}
@@ -175,7 +237,7 @@ export default function BookAppointment() {
                         <TableCell>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button>Book</Button>
+                              <Button className="text-black">Book</Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogTitle>
@@ -207,6 +269,7 @@ export default function BookAppointment() {
                                   onClick={() => {
                                     handleBookAppointment(appointment);
                                   }}
+                                  className="text-black"
                                 >
                                   Confirm
                                 </Button>

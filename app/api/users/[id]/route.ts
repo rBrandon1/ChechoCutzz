@@ -1,9 +1,12 @@
 import { requireApiKey } from "@/lib/middleware/auth";
+import { prisma } from "@/lib/prisma";
 import createServerSupabaseClient from "@/lib/supabase/server";
-import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
-const prisma = new PrismaClient();
+const adminEmails =
+  process.env
+    .ADMIN_EMAILS!.split(",")
+    .map((email) => email.trim().toLowerCase()) || [];
 
 export async function GET(
   request: NextRequest,
@@ -29,16 +32,19 @@ export async function GET(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    if (user.email === "haha@gmail.com") {
-      console.log("YES");
+    if (
+      adminEmails.includes(user.email.toLowerCase()) &&
+      user.role !== "admin"
+    ) {
       await prisma.user.update({
-        where: { email: "haha@gmail.com" },
-        data: { role: "user" },
+        where: { id: user.id },
+        data: { role: "admin" },
       });
+      user.role = "admin";
     }
+
     return NextResponse.json({ user });
   } catch (error) {
-    console.log("Error fetching user from Prisma:", error);
     return NextResponse.json(
       { error: "Error fetching user from database" },
       { status: 500 }
