@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const adminEmails =
   process.env
-    .ADMIN_EMAILS!.split(",")
+    .NEXT_PUBLIC_ADMIN_EMAILS!.split(",")
     .map((email) => email.trim().toLowerCase()) || [];
 
 export async function GET(
