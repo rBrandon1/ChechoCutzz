@@ -193,7 +193,7 @@ export default function BookAppointment() {
       <h1 className="text-4xl italic mb-5">Book an Appointment</h1>
       <div className="mb-5">
         <h2 className="text-lg">
-          Haircut Price - ${isLoading ? "..." : currentPrice}
+          Haircut - ${isLoading ? "..." : currentPrice}
         </h2>
       </div>
       <div className="flex flex-col md:flex-row">
