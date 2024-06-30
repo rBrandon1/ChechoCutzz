@@ -102,7 +102,6 @@ export default function AdminDashboard() {
   );
 
   const handleDeleteAppointment = async (id: number) => {
-    console.log("appointment", id);
     try {
       const res = await fetch(`/api/appointments/${id}`, {
         method: "DELETE",

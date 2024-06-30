@@ -11,19 +11,27 @@ export async function GET() {
 
   try {
     let appointments;
-    const user = await prisma.user.findUnique({
-      where: { id: session?.user.id },
-    });
+    if (session) {
+      const user = await prisma.user.findUnique({
+        where: { id: session?.user.id },
+      });
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+      if (!user) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
 
-    if (user.role === "admin") {
-      // Admin can see all appointments
-      appointments = await prisma.appointment.findMany();
+      if (user.role === "admin") {
+        // Admin can see all appointments
+        appointments = await prisma.appointment.findMany();
+      } else {
+        // Regular user can only see their appointments
+        appointments = await prisma.appointment.findMany({
+          where: {
+            status: "available",
+          },
+        });
+      }
     } else {
-      // Regular user can only see their appointments
       appointments = await prisma.appointment.findMany({
         where: {
           status: "available",

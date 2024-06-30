@@ -168,7 +168,6 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error: any) {
-    console.log("CATCH ERROR", error);
     return NextResponse.json(
       { error: "Error deleting appointment", details: error.message },
       { status: 500 }

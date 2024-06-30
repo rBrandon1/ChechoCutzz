@@ -9,13 +9,17 @@ export async function GET() {
   } = await supabase.auth.getSession();
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: session?.user.id },
-    });
+    if (session) {
+      const user = await prisma.user.findUnique({
+        where: { id: session?.user.id },
+      });
 
-    if (!user) return NextResponse.next();
+      if (!user) return NextResponse.next();
 
-    return NextResponse.json({ user });
+      return NextResponse.json({ user });
+    } else {
+      return NextResponse.json({ user: null, isLoggedIn: false });
+    }
   } catch (error) {
     return NextResponse.json(
       { error: "Error fetching user from database" },
