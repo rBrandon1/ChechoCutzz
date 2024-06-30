@@ -2,6 +2,7 @@
 import { sendAdminNotification, sendEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import createServerSupabaseClient from "@/lib/supabase/server";
+import { Appointment } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PUT(
@@ -101,6 +102,22 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  if (!params?.id) {
+    return NextResponse.json(
+      { error: "Invalid appointment ID" },
+      { status: 400 }
+    );
+  }
+
+  const appointmentId = parseInt(params.id);
+
+  if (isNaN(appointmentId)) {
+    return NextResponse.json(
+      { error: "Invalid appointment ID format" },
+      { status: 400 }
+    );
+  }
+
   try {
     const supabase = await createServerSupabaseClient();
     const {
@@ -111,8 +128,11 @@ export async function DELETE(
       return NextResponse.json({ error: "Please sign in" }, { status: 401 });
     }
 
-    const user = session.user;
-    if (user.user_metadata.user_metadata.role !== "admin") {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+    });
+
+    if (user?.role !== "admin") {
       return NextResponse.json({ error: "Must be an admin" }, { status: 401 });
     }
 
@@ -120,14 +140,6 @@ export async function DELETE(
     if (!id) {
       return NextResponse.json(
         { error: "Invalid appointment ID" },
-        { status: 400 }
-      );
-    }
-
-    const appointmentId = parseInt(id, 10);
-    if (isNaN(appointmentId)) {
-      return NextResponse.json(
-        { error: "Invalid appointment ID format" },
         { status: 400 }
       );
     }
@@ -156,6 +168,7 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error: any) {
+    console.log("CATCH ERROR", error);
     return NextResponse.json(
       { error: "Error deleting appointment", details: error.message },
       { status: 500 }

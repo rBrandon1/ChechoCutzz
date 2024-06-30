@@ -9,15 +9,12 @@ export async function GET() {
     data: { session },
   } = await supabase.auth.getSession();
 
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
-  }
-
   try {
     let appointments;
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: session?.user.id },
     });
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }

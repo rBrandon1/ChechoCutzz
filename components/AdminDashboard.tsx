@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
 import { formatDateAndTime } from "@/lib/formatDateTime";
+import { Appointment } from "@prisma/client";
 import { DateTime } from "luxon";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -100,14 +101,14 @@ export default function AdminDashboard() {
     }
   );
 
-  const handleDeleteAppointment = async (appointment: any) => {
+  const handleDeleteAppointment = async (id: number) => {
+    console.log("appointment", id);
     try {
-      const res = await fetch(`/api/appointments/${appointment.id}`, {
+      const res = await fetch(`/api/appointments/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: appointment.id }),
       });
 
       if (!res.ok) {
@@ -120,7 +121,7 @@ export default function AdminDashboard() {
           description: "Appointment deleted.",
         });
         await fetchAppointments();
-        router.refresh();
+        window.location.href = res.headers.get("Location") || "/admin";
       }
     } catch (error: any) {
       toast({
@@ -130,9 +131,9 @@ export default function AdminDashboard() {
     }
   };
 
-  const markAsBooked = async (appointment: any) => {
+  const markAsBooked = async (id: number) => {
     try {
-      const res = await fetch(`api/appointments/${appointment.id}`, {
+      const res = await fetch(`api/appointments/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -151,7 +152,7 @@ export default function AdminDashboard() {
         toast({
           description: "Marked as booked!",
         });
-        router.refresh();
+        window.location.href = res.headers.get("Location") || "/admin";
       }
     } catch (error: any) {
       toast({
@@ -219,7 +220,7 @@ export default function AdminDashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody className="tracking-widest">
-                {appointmentsByDate?.map((appointment: any) => {
+                {appointmentsByDate?.map((appointment: Appointment) => {
                   const { dateString, timeString } = formatDateAndTime(
                     appointment?.dateTime
                   );
@@ -239,8 +240,10 @@ export default function AdminDashboard() {
                       <TableCell>
                         {isBooked ? (
                           <Popover>
-                            <PopoverTrigger className="underline underline-offset-2">
-                              View
+                            <PopoverTrigger className="underline underline-offset-2 overflow-auto">
+                              {appointment.firstName === ""
+                                ? "View"
+                                : appointment.firstName}
                             </PopoverTrigger>
                             <PopoverContent>
                               <div className="whitespace-normal overflow-auto">
@@ -368,7 +371,7 @@ export default function AdminDashboard() {
                                 >
                                   <Button
                                     onClick={() =>
-                                      handleDeleteAppointment(appointment)
+                                      handleDeleteAppointment(appointment.id)
                                     }
                                   >
                                     Delete
@@ -376,7 +379,7 @@ export default function AdminDashboard() {
                                 </AlertDialogAction>
                                 <AlertDialogAction asChild className="w-full">
                                   <Button
-                                    onClick={() => markAsBooked(appointment)}
+                                    onClick={() => markAsBooked(appointment.id)}
                                     className="text-black"
                                   >
                                     Mark as booked

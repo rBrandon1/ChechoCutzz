@@ -99,6 +99,7 @@ export default function CreateAppointments() {
           }
         } else {
           successCount++;
+          window.location.href = res.headers.get("Location") || "/admin";
         }
       } catch (error: any) {
         toast({
