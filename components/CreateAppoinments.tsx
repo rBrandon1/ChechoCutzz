@@ -192,7 +192,7 @@ export default function CreateAppointments() {
         <Label htmlFor="date">Date</Label>
         <Input
           id="date"
-          className="text-primary-foreground"
+          className="text-primary"
           type="date"
           min={DateTime.now()
             .setZone("America/Los_Angeles")
@@ -210,7 +210,7 @@ export default function CreateAppointments() {
             <Label htmlFor={`time-${index}`}>Time {index + 1}</Label>
             <Input
               id={`time-${index}`}
-              className="text-primary-foreground"
+              className="text-primary"
               type="time"
               value={time}
               onChange={(e) => handleTimeChange(e?.target?.value, index)}

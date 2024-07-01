@@ -2,7 +2,7 @@
 import { sendAdminNotification, sendEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import createServerSupabaseClient from "@/lib/supabase/server";
-import { Appointment } from "@prisma/client";
+import { markConflictingAppointments } from "@/utils/appointmentGenerator";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PUT(
@@ -69,22 +69,28 @@ export async function PUT(
       },
     });
 
+    if (status === "booked") {
+      await markConflictingAppointments(updatedAppointment.id);
+    }
+
     const date = new Date(appointment.dateTime).toLocaleDateString();
     const time = new Date(appointment.dateTime).toLocaleTimeString();
-    await sendEmail(
-      clientEmail!,
-      "Appointment Confirmation",
-      `Your appointment for ${date} at ${time} has been confirmed. View your appointments <a href="https://chechocutzz.com/my-appointments">here</a>.`
-    );
-    await sendAdminNotification(
-      "New Appointment Booked",
-      `A new appointment has been booked:
-      <br>Name: ${firstName} ${lastName}
-      <br>Email: ${clientEmail}
-      <br>Date: ${date}
-      <br>Time: ${time}
-      <br><a href="https://chechocutzz.com/admin">View in Admin Dashboard</a>`
-    );
+
+    // await sendEmail(
+    //   clientEmail!,
+    //   "Appointment Confirmation",
+    //   `Your appointment for ${date} at ${time} has been confirmed. View your appointments <a href="https://chechocutzz.com/my-appointments">here</a>.`
+    // );
+
+    // await sendAdminNotification(
+    //   "New Appointment Booked",
+    //   `A new appointment has been booked:
+    //   <br>Name: ${firstName} ${lastName}
+    //   <br>Email: ${clientEmail}
+    //   <br>Date: ${date}
+    //   <br>Time: ${time}
+    //   <br><a href="https://chechocutzz.com/admin">View in Admin Dashboard</a>`
+    // );
 
     return NextResponse.json(
       { appointment: updatedAppointment },
@@ -92,7 +98,7 @@ export async function PUT(
     );
   } catch (error: any) {
     return NextResponse.json(
-      { error: "Error updating appointment" },
+      { error: "Error updating appointment", details: error.message },
       { status: 500 }
     );
   }

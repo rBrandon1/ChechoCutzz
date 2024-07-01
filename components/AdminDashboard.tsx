@@ -256,7 +256,6 @@ export default function AdminDashboard() {
                                       {appointment.lastName}
                                     </span>
                                   </div>
-
                                   <div>
                                     <span className="text-md text-slate-500">
                                       Email:{" "}

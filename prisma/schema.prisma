@@ -34,3 +34,12 @@ model Price {
   id     Int   @id @default(autoincrement())
   amount Float
 }
+
+model TimeRangeSettings {
+  id           Int      @id @default(autoincrement())
+  weekdayStart Int
+  weekdayEnd   Int
+  weekendStart Int
+  weekendEnd   Int
+  updateAt     DateTime @updatedAt
+}

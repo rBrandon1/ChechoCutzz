@@ -60,24 +60,24 @@ export async function PUT(
     const date = new Date(appointment.dateTime).toLocaleDateString();
     const time = new Date(appointment.dateTime).toLocaleTimeString();
     const isAdminCancellation = user.role === "admin";
-    const emailSubject = isAdminCancellation
-      ? "Appointment Cancelled by Admin"
-      : "Appointment Cancellation Confirmation";
-    const emailContent = isAdminCancellation
-      ? `Your appointment for ${date} at ${time} has been cancelled by the admin. If you have any questions, please message <a href="https://www.instagram.com/checho.cutzz/">ChechoCutzz</a>.`
-      : `Your appointment for ${date} at ${time} has been cancelled as requested.`;
+    // const emailSubject = isAdminCancellation
+    //   ? "Appointment Cancelled by Admin"
+    //   : "Appointment Cancellation Confirmation";
+    // const emailContent = isAdminCancellation
+    //   ? `Your appointment for ${date} at ${time} has been cancelled by the admin. If you have any questions, please message <a href="https://www.instagram.com/checho.cutzz/">ChechoCutzz</a>.`
+    //   : `Your appointment for ${date} at ${time} has been cancelled as requested.`;
 
-    await sendEmail(appointment.clientEmail, emailSubject, emailContent);
-    await sendAdminNotification(
-      "Appointment Cancelled",
-      `An appointment has been cancelled:
-      <br>Name: ${appointment.firstName} ${appointment.lastName}
-      <br>Email: ${appointment.clientEmail}
-      <br>Date: ${date}
-      <br>Time: ${time}
-      <br>Cancelled by: ${isAdminCancellation ? "Admin" : "User"}
-      <br><a href="https://chechocutzz.com/admin">View in Admin Dashboard</a>`
-    );
+    // await sendEmail(appointment.clientEmail, emailSubject, emailContent);
+    // await sendAdminNotification(
+    //   "Appointment Cancelled",
+    //   `An appointment has been cancelled:
+    //   <br>Name: ${appointment.firstName} ${appointment.lastName}
+    //   <br>Email: ${appointment.clientEmail}
+    //   <br>Date: ${date}
+    //   <br>Time: ${time}
+    //   <br>Cancelled by: ${isAdminCancellation ? "Admin" : "User"}
+    //   <br><a href="https://chechocutzz.com/admin">View in Admin Dashboard</a>`
+    // );
 
     return NextResponse.json(
       { appointment: updatedAppointment },

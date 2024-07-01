@@ -28,6 +28,12 @@ export async function GET() {
         appointments = await prisma.appointment.findMany({
           where: {
             status: "available",
+            dateTime: {
+              gte: new Date(),
+            },
+          },
+          orderBy: {
+            dateTime: "asc",
           },
         });
       }
@@ -35,6 +41,12 @@ export async function GET() {
       appointments = await prisma.appointment.findMany({
         where: {
           status: "available",
+          dateTime: {
+            gte: new Date(),
+          },
+        },
+        orderBy: {
+          dateTime: "asc",
         },
       });
     }
