@@ -192,7 +192,7 @@ export default function CreateAppointments() {
         <Label htmlFor="date">Date</Label>
         <Input
           id="date"
-          className="text-primary"
+          className="text-white"
           type="date"
           min={DateTime.now()
             .setZone("America/Los_Angeles")
@@ -203,7 +203,6 @@ export default function CreateAppointments() {
           onChange={handleChange}
         />
       </div>
-
       {times.map((time, index) => (
         <div key={index} className="mb-3 flex items-center">
           <div className="flex-grow">
@@ -228,7 +227,6 @@ export default function CreateAppointments() {
           )}
         </div>
       ))}
-
       <div className="my-6 text-sm">
         <Button
           className="p-0 h-7 flex items-center"
@@ -238,7 +236,6 @@ export default function CreateAppointments() {
           Add Time
         </Button>
       </div>
-
       <div className="flex justify-center">
         <Button
           onClick={openDialog}

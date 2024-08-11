@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { EyeIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
@@ -35,6 +36,7 @@ const FormSchema = z.object({
 });
 
 export default function SignInForm() {
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -111,13 +113,25 @@ export default function SignInForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="password"
-                  {...field}
-                  type="password"
-                  onChange={field.onChange}
-                  disabled={isLoading}
-                />
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="password"
+                    {...field}
+                    type={showPassword ? "text" : "password"}
+                    onChange={field.onChange}
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    <EyeIcon
+                      className={
+                        showPassword ? "text-white" : "text-muted-foreground"
+                      }
+                    />
+                  </button>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>

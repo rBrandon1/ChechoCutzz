@@ -16,7 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
-import { useTransition } from "react";
+import { EyeIcon } from "lucide-react";
+import { useState, useTransition } from "react";
 
 const FormSchema = z
   .object({
@@ -49,6 +50,8 @@ const FormSchema = z
   });
 
 export default function SignUpForm() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, startTransition] = useTransition();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -166,15 +169,26 @@ export default function SignUpForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="Password"
-                  {...field}
-                  type="password"
-                  onChange={field.onChange}
-                  required
-                />
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Password"
+                    {...field}
+                    type={showPassword ? "text" : "password"}
+                    onChange={field.onChange}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    <EyeIcon
+                      className={
+                        showPassword ? "text-white" : "text-muted-foreground"
+                      }
+                    />
+                  </button>
+                </div>
               </FormControl>
-
               <FormMessage />
             </FormItem>
           )}
@@ -186,13 +200,27 @@ export default function SignUpForm() {
             <FormItem>
               <FormLabel>Confirm Password</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="Confirm Password"
-                  {...field}
-                  type="password"
-                  onChange={field.onChange}
-                  required
-                />
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Confirm Password"
+                    {...field}
+                    type={showConfirmPassword ? "text" : "password"}
+                    onChange={field.onChange}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    <EyeIcon
+                      className={
+                        showConfirmPassword
+                          ? "text-white"
+                          : "text-muted-foreground"
+                      }
+                    />
+                  </button>
+                </div>
               </FormControl>
 
               <FormMessage />
