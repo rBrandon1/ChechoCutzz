@@ -56,12 +56,12 @@ export async function markConflictingAppointments(bookedAppoinmentId: number) {
     if (!bookedAppoinment) return;
 
     const bookedDateTime = DateTime.fromJSDate(bookedAppoinment.dateTime);
-    const thirtyMinutesAfter = bookedDateTime.plus({ minutes: 30 });
+    const bookMinutesAfter = bookedDateTime.plus({ minutes: 60 });
 
     await prisma.appointment.deleteMany({
       where: {
         AND: [
-          { dateTime: thirtyMinutesAfter.toJSDate() },
+          { dateTime: bookMinutesAfter.toJSDate() },
           { status: "available" },
         ],
       },

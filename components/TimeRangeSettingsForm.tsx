@@ -172,12 +172,12 @@ export default function TimeRangeSettingsForm() {
                 onClick={() => setIsDialogOpen(true)}
                 className="text-black mt-5 h-8 w-full flex justify-center items-center text-secondary"
               >
-                {isLoading ? "Saving..." : "Save Settings"}
+                {isLoading ? "Generating..." : "Generate Appointments"}
               </Button>
               <div className="text-sm text-slate-500">
-                {isLoading ? "This may take a moment..." : ""}
+                {isLoading ? "This may take up to 3 minutes..." : ""}
               </div>
-              <div className="text-sm text-destructive">
+              <div className="text-sm text-red-500">
                 {isLoading ? "DO NOT REFRESH" : ""}
               </div>
             </div>
@@ -185,7 +185,7 @@ export default function TimeRangeSettingsForm() {
           <AlertDialogContent>
             <AlertDialogTitle>Confirm Settings</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to save these settings?
+              Are you sure you want to generate new appointments?
             </AlertDialogDescription>
             <div className="flex justify-end space-x-2">
               <AlertDialogCancel asChild>
@@ -200,7 +200,7 @@ export default function TimeRangeSettingsForm() {
                     )?.requestSubmit()
                   }
                 >
-                  Save
+                  Yes
                 </Button>
               </AlertDialogAction>
             </div>

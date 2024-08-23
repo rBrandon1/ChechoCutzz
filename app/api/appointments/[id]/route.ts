@@ -76,21 +76,21 @@ export async function PUT(
     const date = new Date(appointment.dateTime).toLocaleDateString();
     const time = new Date(appointment.dateTime).toLocaleTimeString();
 
-    // await sendEmail(
-    //   clientEmail!,
-    //   "Appointment Confirmation",
-    //   `Your appointment for ${date} at ${time} has been confirmed. View your appointments <a href="https://chechocutzz.com/my-appointments">here</a>.`
-    // );
+    await sendEmail(
+      clientEmail!,
+      "Appointment Confirmation",
+      `Your appointment for ${date} at ${time} has been confirmed. View your appointments <a href="https://chechocutzz.com/my-appointments">here</a>.`
+    );
 
-    // await sendAdminNotification(
-    //   "New Appointment Booked",
-    //   `A new appointment has been booked:
-    //   <br>Name: ${firstName} ${lastName}
-    //   <br>Email: ${clientEmail}
-    //   <br>Date: ${date}
-    //   <br>Time: ${time}
-    //   <br><a href="https://chechocutzz.com/admin">View in Admin Dashboard</a>`
-    // );
+    await sendAdminNotification(
+      "New Appointment Booked",
+      `A new appointment has been booked:
+      <br>Name: ${firstName} ${lastName}
+      <br>Email: ${clientEmail}
+      <br>Date: ${date}
+      <br>Time: ${time}
+      <br><a href="https://chechocutzz.com/admin">View in Admin Dashboard</a>`
+    );
 
     return NextResponse.json(
       { appointment: updatedAppointment },
