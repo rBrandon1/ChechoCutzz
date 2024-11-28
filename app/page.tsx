@@ -29,7 +29,7 @@ export default function Home() {
         <div className="absolute inset-0 z-0 modern-gradient">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
         </div>
-        
+
         <div className="container mx-auto px-4 z-10 text-center">
           <h1 className="text-4xl md:text-6xl font-bold gradient-text mb-6">
             Welcome to ChechoCutzz
@@ -37,7 +37,11 @@ export default function Home() {
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
             Experience premium barbering services tailored to your style
           </p>
-          <Button asChild className="hover-scale gradient-button border-0" size="lg">
+          <Button
+            asChild
+            className="hover-scale gradient-button border-0"
+            size="lg"
+          >
             <Link href="/book">Book Your Appointment</Link>
           </Button>
         </div>
@@ -47,7 +51,9 @@ export default function Home() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold gradient-text">Latest Styles</h2>
+            <h2 className="text-3xl md:text-4xl font-bold gradient-text">
+              Latest Styles
+            </h2>
             <a
               href="https://www.instagram.com/checho.cutzz/"
               target="_blank"
@@ -57,7 +63,7 @@ export default function Home() {
               <InstagramLogoIcon className="h-8 w-8 text-[rgb(230,50,105)]" />
             </a>
           </div>
-          
+
           <Swiper
             className="mySwiper"
             autoplay={{
@@ -132,16 +138,29 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="glass-effect p-6 rounded-lg hover-scale">
-              <h3 className="text-xl font-semibold mb-3 gradient-text">Your Style, Your Way</h3>
-              <p className="text-muted-foreground">Whether it's sharp fades or natural curls, every cut's done just for you.</p>
+              <h3 className="text-xl font-semibold mb-3 gradient-text">
+                Your Style, Your Way
+              </h3>
+              <p className="text-muted-foreground">
+                Whether it&apos;s sharp fades or natural curls, every cut's done
+                just for you.
+              </p>
             </div>
             <div className="glass-effect p-6 rounded-lg hover-scale">
-              <h3 className="text-xl font-semibold mb-3 gradient-text">No Rush, Just Results</h3>
-              <p className="text-muted-foreground">Focused on making sure you leave looking your best.</p>
+              <h3 className="text-xl font-semibold mb-3 gradient-text">
+                No Rush, Just Results
+              </h3>
+              <p className="text-muted-foreground">
+                Focused on making sure you leave looking your best.
+              </p>
             </div>
             <div className="glass-effect p-6 rounded-lg hover-scale">
-              <h3 className="text-xl font-semibold mb-3 gradient-text">Look Good, Feel Good</h3>
-              <p className="text-muted-foreground">Competitive pricing that works for you.</p>
+              <h3 className="text-xl font-semibold mb-3 gradient-text">
+                Look Good, Feel Good
+              </h3>
+              <p className="text-muted-foreground">
+                Competitive pricing that works for you.
+              </p>
             </div>
           </div>
         </div>

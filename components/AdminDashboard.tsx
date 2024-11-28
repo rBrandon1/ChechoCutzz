@@ -324,7 +324,9 @@ export default function AdminDashboard() {
                                       className="h-7"
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        setEditName(appointment.firstName || "");
+                                        setEditName(
+                                          appointment.firstName || ""
+                                        );
                                         setEditingAppointment(appointment);
                                       }}
                                     >
@@ -353,7 +355,9 @@ export default function AdminDashboard() {
                                       <div className="space-y-2">
                                         <Label>Status</Label>
                                         <Select
-                                          value={editStatus || appointment.status}
+                                          value={
+                                            editStatus || appointment.status
+                                          }
                                           onValueChange={(value) => {
                                             setEditStatus(value);
                                           }}
@@ -386,7 +390,8 @@ export default function AdminDashboard() {
                                       <div className="space-y-2">
                                         <Label>Current Client Name</Label>
                                         <div>
-                                          {appointment.firstName || "Not booked"}
+                                          {appointment.firstName ||
+                                            "Not booked"}
                                         </div>
                                       </div>
                                       <div className="space-y-2">
@@ -413,7 +418,9 @@ export default function AdminDashboard() {
                                               updates.status = editStatus;
                                             }
 
-                                            if (Object.keys(updates).length > 0) {
+                                            if (
+                                              Object.keys(updates).length > 0
+                                            ) {
                                               handleUpdateAppointment(
                                                 appointment.id,
                                                 updates
@@ -453,7 +460,9 @@ export default function AdminDashboard() {
                                       </AlertDialogCancel>
                                       <AlertDialogAction
                                         onClick={() =>
-                                          handleDeleteAppointment(appointment.id)
+                                          handleDeleteAppointment(
+                                            appointment.id
+                                          )
                                         }
                                       >
                                         Delete
@@ -494,7 +503,8 @@ export default function AdminDashboard() {
             <AlertDialogContent>
               <AlertDialogTitle>Generate Appointments</AlertDialogTitle>
               <AlertDialogDescription>
-                This will generate appointments for the next 2 weeks. Are you sure you want to continue?
+                This will generate appointments for the next 2 weeks. Are you
+                sure you want to continue?
               </AlertDialogDescription>
               <div className="flex justify-end space-x-2">
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
