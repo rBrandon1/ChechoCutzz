@@ -142,8 +142,8 @@ export default function Home() {
                 Your Style, Your Way
               </h3>
               <p className="text-muted-foreground">
-                Whether it&apos;s sharp fades or natural curls, every cut's done
-                just for you.
+                Whether it&apos;s sharp fades or natural curls, every cut&apos;s
+                done just for you.
               </p>
             </div>
             <div className="glass-effect p-6 rounded-lg hover-scale">
