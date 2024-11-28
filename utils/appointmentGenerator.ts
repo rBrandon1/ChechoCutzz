@@ -67,7 +67,6 @@ export async function markConflictingAppointments(bookedAppoinmentId: number) {
       },
     });
   } catch (error) {
-    console.error("Error marking conflicting appointments", error);
     throw error;
   }
 }

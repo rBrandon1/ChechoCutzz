@@ -10,6 +10,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -18,33 +25,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
-import { formatDateAndTime } from "@/lib/formatDateTime";
+import { cn } from "@/lib/utils";
 import { Appointment } from "@prisma/client";
-import { ChevronLeft, ChevronRight, Cross, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, X } from "lucide-react";
 import { DateTime } from "luxon";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import AppointmentSkeleton from "./AppointmentSkeleton";
+import { Badge } from "./ui/badge";
+import { Card, CardContent } from "./ui/card";
+import { Label } from "./ui/label";
+import { ScrollArea } from "./ui/scroll-area";
 
 export default function AdminDashboard() {
   const router = useRouter();
   const { toast } = useToast();
   const [newFirstName, setNewFirstName] = useState("");
+  const [editName, setEditName] = useState("");
+  const [editStatus, setEditStatus] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedDate, setSelectedDate] = useState(() => {
     return DateTime.now().toLocal().startOf("week");
   });
+  const [convertedAppointments, setConvertedAppointments] = useState<
+    Appointment[]
+  >([]);
+  const [editingAppointment, setEditingAppointment] =
+    useState<Appointment | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const [convertedAppointments, setConvertedAppointments] = useState([]);
   const fetchAppointments = async () => {
     try {
       const res = await fetch("/api/appointments", {
@@ -52,14 +61,17 @@ export default function AdminDashboard() {
         method: "GET",
       });
 
+      if (!res.ok) {
+        throw new Error("Failed to fetch appointments");
+      }
+
       const { appointments } = await res.json();
-
-      const mappedAppointments = appointments.map((appointment: any) => ({
-        ...appointment,
-        dateTime: appointment.dateTime,
-      }));
-
-      setConvertedAppointments(mappedAppointments);
+      setConvertedAppointments(
+        appointments.map((apt: Appointment) => ({
+          ...apt,
+          status: apt.status.toLowerCase(),
+        }))
+      );
     } catch (error) {
       toast({
         description: "Failed to load appointments. Please try again.",
@@ -70,351 +82,421 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchAppointments();
-  }, [selectedDate]);
+  }, []);
 
   const handleDeleteAppointment = async (id: number) => {
     try {
       const res = await fetch(`/api/appointments/${id}`, {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
       });
 
       if (!res.ok) {
-        toast({
-          description: "Error deleting appointment.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          description: "Appointment deleted.",
-        });
-        await fetchAppointments();
-        window.location.href = res.headers.get("Location") || "/admin";
+        throw new Error("Failed to delete appointment");
       }
-    } catch (error: any) {
+
       toast({
-        description: error.message,
+        description: "Appointment deleted.",
+      });
+
+      // Force a page refresh
+      window.location.reload();
+    } catch (error) {
+      toast({
+        description: "Error deleting appointment.",
         variant: "destructive",
       });
     }
   };
 
-  const markAsBooked = async (id: number) => {
+  const handleUpdateAppointment = async (
+    id: number,
+    updates: { firstName?: string; status?: string }
+  ) => {
     try {
-      const [firstName, lastName = ""] = newFirstName.split(" ");
-
-      const res = await fetch(`api/appointments/${id}`, {
+      const res = await fetch(`/api/appointments/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          status: "booked",
-          firstName,
-          lastName: lastName || "",
+          ...updates,
+          dateTime: editingAppointment?.dateTime,
         }),
       });
 
       if (!res.ok) {
-        toast({
-          description: "Error marking appointment as booked.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          description: "Marked as booked!",
-        });
-        window.location.href = res.headers.get("Location") || "/admin";
+        throw new Error("Failed to update appointment");
       }
-    } catch (error: any) {
+
       toast({
-        description: error.message,
-        variant: "destructive",
+        description: "Appointment updated.",
       });
+      setNewFirstName("");
+      setEditName("");
+      setEditingAppointment(null);
       await fetchAppointments();
-      router.refresh();
+    } catch (error) {
+      toast({
+        description: "Error updating appointment.",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleNameChange = async (appointment: any) => {
+  const handleGenerateAppointments = async () => {
     try {
-      const [firstName, lastName = ""] = newFirstName.split(" ");
-
-      const res = await fetch(`api/appointments/${appointment.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firstName,
-          lastName: lastName || "",
-        }),
+      setIsGenerating(true);
+      const res = await fetch("/api/appointments/create", {
+        method: "POST",
       });
 
       if (!res.ok) {
-        toast({
-          description: "Error updating appointment.",
-          variant: "destructive",
-        });
-      } else {
-        toast({ description: "Appointment updated successfully!" });
-        await fetchAppointments();
-        router.refresh();
+        throw new Error("Failed to generate appointments");
       }
-    } catch (error: any) {
-      toast({ description: error.message, variant: "destructive" });
+
+      toast({
+        description: "Appointments generated successfully.",
+      });
+
+      // Refresh appointments
+      await fetchAppointments();
+    } catch (error) {
+      toast({
+        description: "Error generating appointments.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
-  const filterAppointments = (appointments: any) => {
-    if (statusFilter === "all") return appointments;
-    return appointments.filter((apt: any) => apt.status === statusFilter);
-  };
+  const filteredAppointments = convertedAppointments.filter((appointment) => {
+    return (
+      statusFilter === "all" ||
+      appointment.status === statusFilter.toLowerCase()
+    );
+  });
 
-  const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-  const generateTimeSlots = () => {
-    const slots = [];
-    for (let hour = 8; hour < 23; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        slots.push(DateTime.fromObject({ hour, minute }).toFormat("hh:mm a"));
-      }
+  const getStatusBadgeColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "available":
+        return "text-lime-500";
+      case "booked":
+        return "text-red-500";
+      default:
+        return "text-gray-500";
     }
-    return slots;
   };
 
-  const timeSlots = generateTimeSlots();
+  const groupAppointmentsByDate = (appointments: Appointment[]) => {
+    return appointments.reduce<Record<string, Appointment[]>>(
+      (acc, appointment) => {
+        const dateStr =
+          typeof appointment.dateTime === "string"
+            ? appointment.dateTime
+            : appointment.dateTime.toISOString();
 
-  const getAppointmentsForDay = (day: number) => {
-    const appointmentDate = selectedDate.plus({ days: day });
-    return convertedAppointments.filter((apt: any) =>
-      DateTime.fromISO(apt.dateTime).hasSame(appointmentDate, "day")
+        const date = DateTime.fromISO(dateStr).toISODate();
+        if (date && !acc[date]) {
+          acc[date] = [];
+        }
+        if (date) {
+          acc[date].push(appointment);
+        }
+        return acc;
+      },
+      {}
     );
   };
 
-  const sortAppointmentsIntoSlots = (appointments: any[]) => {
-    const sortedSlots: { [key: string]: any[] } = {};
-    appointments.forEach((apt) => {
-      const aptTime = DateTime.fromISO(apt.dateTime).toFormat("hh:mm a");
-      if (!sortedSlots[aptTime]) {
-        sortedSlots[aptTime] = [];
-      }
-      sortedSlots[aptTime].push(apt);
+  const appointmentsByDate = Object.entries(
+    groupAppointmentsByDate(filteredAppointments)
+  ).reduce<Record<string, Appointment[]>>((acc, [date, appointments]) => {
+    // Sort appointments by time for each date
+    acc[date] = appointments.sort((a, b) => {
+      const timeA = DateTime.fromISO(a.dateTime.toString()).toMillis();
+      const timeB = DateTime.fromISO(b.dateTime.toString()).toMillis();
+      return timeA - timeB;
     });
-    return sortedSlots;
-  };
+    return acc;
+  }, {});
 
-  const navigateWeek = (direction: "prev" | "next") => {
-    setSelectedDate((prev) =>
-      prev.plus({ weeks: direction === "next" ? 1 : -1 })
-    );
+  const formatAppointmentDateTime = (dateTime: Date | string) => {
+    const dateStr =
+      typeof dateTime === "string" ? dateTime : dateTime.toISOString();
+    return DateTime.fromISO(dateStr);
   };
 
   return (
-    <div className="flex flex-col">
-      <div className="flex justify-between items-center mb-4">
-        <button onClick={() => navigateWeek("prev")}>
-          <ChevronLeft />
-        </button>
-        <h2 className="text-lg font-semibold">
-          Week of {selectedDate.toFormat("MMMM d, yyyy")}
-        </h2>
-        <button onClick={() => navigateWeek("next")}>
-          <ChevronRight />
-        </button>
-      </div>
-      <div className="mb-4">
-        <Select onValueChange={setStatusFilter} defaultValue="all">
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Appointments</SelectItem>
-            <SelectItem value="booked">Booked</SelectItem>
-            <SelectItem value="available">Available</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      {!convertedAppointments ? (
-        <AppointmentSkeleton />
-      ) : (
-        <div className="w-full max-w-7xl mx-auto">
-          <div className="border rounded-lg overflow-hidden">
-            <div className="overflow-auto max-h-[50vh]">
-              <Table>
-                <TableHeader className="sticky top-0 bg-background z-10">
-                  <TableRow>
-                    <TableHead className="w-20 bg-background sticky left-0 z-20">
-                      Time
-                    </TableHead>
-                    {daysOfWeek.map((day, index) => {
-                      const date = selectedDate.plus({ days: index });
-                      const isToday = date.hasSame(DateTime.now(), "day");
-                      return (
-                        <TableHead
-                          key={day}
-                          className={`text-center min-w-[150px] ${
-                            isToday ? "bg-muted" : ""
-                          }`}
-                        >
-                          {day} {date.toFormat("MM/dd")}
-                        </TableHead>
-                      );
-                    })}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {timeSlots.map((time) => (
-                    <TableRow key={time}>
-                      <TableCell className="font-medium bg-background sticky left-0 z-10">
-                        {time}
-                      </TableCell>
-                      {daysOfWeek.map((_, dayIndex) => {
-                        const dayDate = selectedDate.plus({ days: dayIndex });
-                        const appointmentsForDay =
-                          getAppointmentsForDay(dayIndex);
-                        const sortedAppointments =
-                          sortAppointmentsIntoSlots(appointmentsForDay);
-                        const appointmentsForSlot = filterAppointments(
-                          sortedAppointments[time] || []
-                        );
-
-                        return (
-                          <TableCell
-                            key={`${time}-${dayIndex}`}
-                            className={`text-center min-w-[150px] ${
-                              dayDate.hasSame(DateTime.now(), "day")
-                                ? "bg-[#1f1f21]"
-                                : ""
-                            }`}
-                          >
-                            {appointmentsForSlot.length > 0 ? (
-                              appointmentsForSlot.map(
-                                (appointment: Appointment) => (
-                                  <AlertDialog key={appointment.id}>
-                                    <AlertDialogTrigger asChild>
-                                      <Button
-                                        variant="link"
-                                        className={`text-xs ${
-                                          appointment.status === "booked"
-                                            ? "text-green-500"
-                                            : ""
-                                        }`}
-                                      >
-                                        {appointment.status === "booked"
-                                          ? `${appointment.firstName} ${appointment.lastName}`
-                                          : appointment.status === "available"
-                                          ? "Available"
-                                          : "Unavailable"}
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <div className="flex items-center justify-between">
-                                        <AlertDialogTitle>
-                                          Appointment Details
-                                        </AlertDialogTitle>
-                                        <AlertDialogCancel className="border-none m-0 p-0">
-                                          <X />
-                                        </AlertDialogCancel>
-                                      </div>
-                                      <AlertDialogDescription>
-                                        <p>
-                                          Client: {appointment.firstName}{" "}
-                                          {appointment.lastName}
-                                        </p>
-                                        <p>
-                                          Time:{" "}
-                                          {
-                                            formatDateAndTime(
-                                              appointment.dateTime
-                                            ).timeString
-                                          }
-                                        </p>
-                                        <p>
-                                          Day:{" "}
-                                          {DateTime.fromISO(
-                                            appointment.dateTime.toString()
-                                          ).toFormat("cccc")}
-                                        </p>
-                                        <p>
-                                          Status:{" "}
-                                          {appointment.status.toUpperCase()}
-                                        </p>
-                                        <Input
-                                          id="newName"
-                                          type="text"
-                                          placeholder="New name"
-                                          className="w-full h-8 bg-popover"
-                                          value={newFirstName}
-                                          onChange={(e) =>
-                                            setNewFirstName(e?.target?.value)
-                                          }
-                                        />
-                                      </AlertDialogDescription>
-                                      <div className="flex justify-end space-x-2">
-                                        {appointment.status === "available" && (
-                                          <AlertDialogAction
-                                            onClick={() => {
-                                              if (newFirstName.length > 1) {
-                                                markAsBooked(appointment.id);
-                                              } else {
-                                                toast({
-                                                  description:
-                                                    "Please enter a client name.",
-                                                  variant: "destructive",
-                                                });
-                                              }
-                                            }}
-                                            className="text-black"
-                                          >
-                                            Mark as booked
-                                          </AlertDialogAction>
-                                        )}
-                                        <AlertDialogAction
-                                          onClick={() =>
-                                            handleNameChange(appointment)
-                                          }
-                                          className="text-secondary"
-                                        >
-                                          Update Name
-                                        </AlertDialogAction>
-                                        <AlertDialogAction
-                                          onClick={() =>
-                                            handleDeleteAppointment(
-                                              appointment.id
-                                            )
-                                          }
-                                          className="bg-destructive"
-                                        >
-                                          Delete
-                                        </AlertDialogAction>
-                                      </div>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                )
-                              )
-                            ) : statusFilter === "all" ? (
-                              <span className="text-xs text-gray-400">
-                                Unavailable
-                              </span>
-                            ) : statusFilter === "available" ? (
-                              <span className="text-xs text-gray-400">
-                                {""}
-                              </span>
-                            ) : null}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+    <div className="space-y-6">
+      <div className="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:items-center">
+        <div className="flex items-center justify-center space-x-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const newDate = selectedDate.minus({ weeks: 1 });
+              setSelectedDate(newDate);
+            }}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="text-sm">
+            {selectedDate.toFormat("MMMM d")} -{" "}
+            {selectedDate.plus({ days: 6 }).toFormat("MMMM d, yyyy")}
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const newDate = selectedDate.plus({ weeks: 1 });
+              setSelectedDate(newDate);
+            }}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
-      )}
+        <div className="flex items-center space-x-4">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm" disabled={isGenerating}>
+                Generate 2 Week Appointments
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogTitle>Generate Appointments</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will generate appointments for the next 2 weeks. Are you sure you want to continue?
+              </AlertDialogDescription>
+              <div className="flex justify-end space-x-2">
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleGenerateAppointments}
+                >
+                  {isGenerating ? "Generating..." : "Generate"}
+                </AlertDialogAction>
+              </div>
+            </AlertDialogContent>
+          </AlertDialog>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="available">Available</SelectItem>
+              <SelectItem value="booked">Booked</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
+        {[...Array(7)].map((_, index) => {
+          const date = selectedDate.plus({ days: index });
+          const dateStr = date.toISODate();
+          const appointments = appointmentsByDate[dateStr] || [];
+
+          return (
+            <Card
+              key={dateStr}
+              className="h-[400px] flex flex-col bg-secondary"
+            >
+              <CardContent className="p-3 flex-1">
+                <div className="font-semibold mb-2 text-sm">
+                  {date.toFormat("ccc, LLL d")}
+                </div>
+                <ScrollArea className="h-[340px] w-full">
+                  <div className="space-y-2 pr-4">
+                    {appointments.length > 0 ? (
+                      appointments.map((appointment) => (
+                        <div
+                          key={appointment.id}
+                          className="p-2 rounded-md bg-background hover:bg-accent cursor-pointer"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1 min-w-0">
+                              <Badge
+                                variant="outline"
+                                className={cn(
+                                  getStatusBadgeColor(appointment.status)
+                                )}
+                              >
+                                {appointment.status}
+                              </Badge>
+                              <div className="text-sm mt-1">
+                                {formatAppointmentDateTime(
+                                  appointment.dateTime
+                                ).toFormat("h:mm a")}
+                              </div>
+                              {appointment.firstName && (
+                                <div className="text-sm font-medium truncate">
+                                  {appointment.firstName}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEditName(appointment.firstName || "");
+                                      setEditingAppointment(appointment);
+                                    }}
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>
+                                      {appointment.firstName
+                                        ? `${appointment.firstName}'s Appointment`
+                                        : "Appointment Details"}
+                                    </DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <div className="space-y-2">
+                                      <Label>Client Name</Label>
+                                      <Input
+                                        value={editName}
+                                        onChange={(e) =>
+                                          setEditName(e.target.value)
+                                        }
+                                        placeholder="Enter client name"
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Status</Label>
+                                      <Select
+                                        value={editStatus || appointment.status}
+                                        onValueChange={(value) => {
+                                          setEditStatus(value);
+                                        }}
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="available">
+                                            Available
+                                          </SelectItem>
+                                          <SelectItem value="booked">
+                                            Booked
+                                          </SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Date & Time</Label>
+                                      <div>
+                                        {formatAppointmentDateTime(
+                                          appointment.dateTime
+                                        ).toFormat("DDDD")}
+                                        {" at "}
+                                        {formatAppointmentDateTime(
+                                          appointment.dateTime
+                                        ).toFormat("h:mm a")}
+                                      </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Current Client Name</Label>
+                                      <div>
+                                        {appointment.firstName || "Not booked"}
+                                      </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Client Email</Label>
+                                      <div>
+                                        {appointment.clientEmail ||
+                                          "Not provided"}
+                                      </div>
+                                    </div>
+                                    <div className="flex justify-end">
+                                      <Button
+                                        size="sm"
+                                        onClick={() => {
+                                          const updates: {
+                                            firstName?: string;
+                                            status?: string;
+                                          } = {};
+
+                                          if (editName.trim()) {
+                                            updates.firstName = editName;
+                                          }
+
+                                          if (editStatus) {
+                                            updates.status = editStatus;
+                                          }
+
+                                          if (Object.keys(updates).length > 0) {
+                                            handleUpdateAppointment(
+                                              appointment.id,
+                                              updates
+                                            );
+                                            setEditStatus("");
+                                          }
+                                        }}
+                                      >
+                                        Save
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogTitle>
+                                    Delete Appointment
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this
+                                    appointment?
+                                  </AlertDialogDescription>
+                                  <div className="flex justify-end space-x-2">
+                                    <AlertDialogCancel>
+                                      Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() =>
+                                        handleDeleteAppointment(appointment.id)
+                                      }
+                                    >
+                                      Delete
+                                    </AlertDialogAction>
+                                  </div>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                        No appointments for this day
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 }

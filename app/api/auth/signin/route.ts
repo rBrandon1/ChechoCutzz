@@ -3,8 +3,18 @@ import { prisma } from "@/lib/prisma";
 import createServerSupabaseClient from "@/lib/supabase/server";
 import bcrypt from "bcrypt";
 import { NextRequest, NextResponse } from "next/server";
+import { corsHeaders } from "../../cors";
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 export async function POST(req: NextRequest) {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return NextResponse.json({}, { headers: corsHeaders });
+  }
+
   const { email, password } = await req.json();
 
   try {
@@ -16,7 +26,10 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { error: "Invalid credentials" },
-        { status: 400 }
+        { 
+          status: 400,
+          headers: corsHeaders
+        }
       );
     }
 
@@ -26,7 +39,10 @@ export async function POST(req: NextRequest) {
     if (!passwordMatch) {
       return NextResponse.json(
         { error: "Invalid credentials" },
-        { status: 400 }
+        { 
+          status: 400,
+          headers: corsHeaders
+        }
       );
     }
 
@@ -44,6 +60,7 @@ export async function POST(req: NextRequest) {
       {
         status: 200,
         headers: {
+          ...corsHeaders,
           Location: "/",
         },
       }
@@ -51,7 +68,10 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     return NextResponse.json(
       { error: "An error occurred during sign in" },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: corsHeaders
+      }
     );
   }
 }
