@@ -257,27 +257,6 @@ export default function AdminDashboard() {
           </Button>
         </div>
         <div className="flex items-center space-x-4">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" disabled={isGenerating}>
-                Generate 2 Week Appointments
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogTitle>Generate Appointments</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will generate appointments for the next 2 weeks. Are you sure you want to continue?
-              </AlertDialogDescription>
-              <div className="flex justify-end space-x-2">
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleGenerateAppointments}
-                >
-                  {isGenerating ? "Generating..." : "Generate"}
-                </AlertDialogAction>
-              </div>
-            </AlertDialogContent>
-          </AlertDialog>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by status" />
@@ -298,205 +277,235 @@ export default function AdminDashboard() {
           const appointments = appointmentsByDate[dateStr] || [];
 
           return (
-            <Card
-              key={dateStr}
-              className="h-[400px] flex flex-col bg-secondary"
-            >
-              <CardContent className="p-3 flex-1">
-                <div className="font-semibold mb-2 text-sm">
-                  {date.toFormat("ccc, LLL d")}
-                </div>
-                <ScrollArea className="h-[340px] w-full">
-                  <div className="space-y-2 pr-4">
-                    {appointments.length > 0 ? (
-                      appointments.map((appointment) => (
-                        <div
-                          key={appointment.id}
-                          className="p-2 rounded-md bg-background hover:bg-accent cursor-pointer"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1 min-w-0">
-                              <Badge
-                                variant="outline"
-                                className={cn(
-                                  getStatusBadgeColor(appointment.status)
-                                )}
-                              >
-                                {appointment.status}
-                              </Badge>
-                              <div className="text-sm mt-1">
-                                {formatAppointmentDateTime(
-                                  appointment.dateTime
-                                ).toFormat("h:mm a")}
-                              </div>
-                              {appointment.firstName && (
-                                <div className="text-sm font-medium truncate">
-                                  {appointment.firstName}
+            <Card key={dateStr}>
+              <CardContent className="p-6">
+                <div className="space-y-2">
+                  <div className="font-semibold">
+                    {date.toFormat("EEEE")}
+                    <div className="text-sm font-normal text-muted-foreground">
+                      {date.toFormat("LLL d")}
+                    </div>
+                  </div>
+                  <ScrollArea className="h-[340px] w-full">
+                    <div className="space-y-2 pr-4">
+                      {appointments.length > 0 ? (
+                        appointments.map((appointment) => (
+                          <div
+                            key={appointment.id}
+                            className="p-2 rounded-md bg-background hover:bg-accent cursor-pointer"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1 min-w-0">
+                                <Badge
+                                  variant="outline"
+                                  className={cn(
+                                    getStatusBadgeColor(appointment.status)
+                                  )}
+                                >
+                                  {appointment.status}
+                                </Badge>
+                                <div className="text-sm mt-1">
+                                  {formatAppointmentDateTime(
+                                    appointment.dateTime
+                                  ).toFormat("h:mm a")}
                                 </div>
-                              )}
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setEditName(appointment.firstName || "");
-                                      setEditingAppointment(appointment);
-                                    }}
-                                  >
-                                    <Pencil className="h-4 w-4" />
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>
-                                      {appointment.firstName
-                                        ? `${appointment.firstName}'s Appointment`
-                                        : "Appointment Details"}
-                                    </DialogTitle>
-                                  </DialogHeader>
-                                  <div className="space-y-4">
-                                    <div className="space-y-2">
-                                      <Label>Client Name</Label>
-                                      <Input
-                                        value={editName}
-                                        onChange={(e) =>
-                                          setEditName(e.target.value)
-                                        }
-                                        placeholder="Enter client name"
-                                      />
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label>Status</Label>
-                                      <Select
-                                        value={editStatus || appointment.status}
-                                        onValueChange={(value) => {
-                                          setEditStatus(value);
-                                        }}
-                                      >
-                                        <SelectTrigger>
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="available">
-                                            Available
-                                          </SelectItem>
-                                          <SelectItem value="booked">
-                                            Booked
-                                          </SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label>Date & Time</Label>
-                                      <div>
-                                        {formatAppointmentDateTime(
-                                          appointment.dateTime
-                                        ).toFormat("DDDD")}
-                                        {" at "}
-                                        {formatAppointmentDateTime(
-                                          appointment.dateTime
-                                        ).toFormat("h:mm a")}
-                                      </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label>Current Client Name</Label>
-                                      <div>
-                                        {appointment.firstName || "Not booked"}
-                                      </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label>Client Email</Label>
-                                      <div>
-                                        {appointment.clientEmail ||
-                                          "Not provided"}
-                                      </div>
-                                    </div>
-                                    <div className="flex justify-end">
-                                      <Button
-                                        size="sm"
-                                        onClick={() => {
-                                          const updates: {
-                                            firstName?: string;
-                                            status?: string;
-                                          } = {};
-
-                                          if (editName.trim()) {
-                                            updates.firstName = editName;
-                                          }
-
-                                          if (editStatus) {
-                                            updates.status = editStatus;
-                                          }
-
-                                          if (Object.keys(updates).length > 0) {
-                                            handleUpdateAppointment(
-                                              appointment.id,
-                                              updates
-                                            );
-                                            setEditStatus("");
-                                          }
-                                        }}
-                                      >
-                                        Save
-                                      </Button>
-                                    </div>
+                                {appointment.firstName && (
+                                  <div className="text-sm font-medium truncate">
+                                    {appointment.firstName}
                                   </div>
-                                </DialogContent>
-                              </Dialog>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogTitle>
-                                    Delete Appointment
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete this
-                                    appointment?
-                                  </AlertDialogDescription>
-                                  <div className="flex justify-end space-x-2">
-                                    <AlertDialogCancel>
-                                      Cancel
-                                    </AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() =>
-                                        handleDeleteAppointment(appointment.id)
-                                      }
+                                )}
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditName(appointment.firstName || "");
+                                        setEditingAppointment(appointment);
+                                      }}
                                     >
-                                      Delete
-                                    </AlertDialogAction>
-                                  </div>
-                                </AlertDialogContent>
-                              </AlertDialog>
+                                      <Pencil className="h-4 w-4" />
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent>
+                                    <DialogHeader>
+                                      <DialogTitle>
+                                        {appointment.firstName
+                                          ? `${appointment.firstName}'s Appointment`
+                                          : "Appointment Details"}
+                                      </DialogTitle>
+                                    </DialogHeader>
+                                    <div className="space-y-4">
+                                      <div className="space-y-2">
+                                        <Label>Client Name</Label>
+                                        <Input
+                                          value={editName}
+                                          onChange={(e) =>
+                                            setEditName(e.target.value)
+                                          }
+                                          placeholder="Enter client name"
+                                        />
+                                      </div>
+                                      <div className="space-y-2">
+                                        <Label>Status</Label>
+                                        <Select
+                                          value={editStatus || appointment.status}
+                                          onValueChange={(value) => {
+                                            setEditStatus(value);
+                                          }}
+                                        >
+                                          <SelectTrigger>
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="available">
+                                              Available
+                                            </SelectItem>
+                                            <SelectItem value="booked">
+                                              Booked
+                                            </SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                      <div className="space-y-2">
+                                        <Label>Date & Time</Label>
+                                        <div>
+                                          {formatAppointmentDateTime(
+                                            appointment.dateTime
+                                          ).toFormat("DDDD")}
+                                          {" at "}
+                                          {formatAppointmentDateTime(
+                                            appointment.dateTime
+                                          ).toFormat("h:mm a")}
+                                        </div>
+                                      </div>
+                                      <div className="space-y-2">
+                                        <Label>Current Client Name</Label>
+                                        <div>
+                                          {appointment.firstName || "Not booked"}
+                                        </div>
+                                      </div>
+                                      <div className="space-y-2">
+                                        <Label>Client Email</Label>
+                                        <div>
+                                          {appointment.clientEmail ||
+                                            "Not provided"}
+                                        </div>
+                                      </div>
+                                      <div className="flex justify-end">
+                                        <Button
+                                          size="sm"
+                                          onClick={() => {
+                                            const updates: {
+                                              firstName?: string;
+                                              status?: string;
+                                            } = {};
+
+                                            if (editName.trim()) {
+                                              updates.firstName = editName;
+                                            }
+
+                                            if (editStatus) {
+                                              updates.status = editStatus;
+                                            }
+
+                                            if (Object.keys(updates).length > 0) {
+                                              handleUpdateAppointment(
+                                                appointment.id,
+                                                updates
+                                              );
+                                              setEditStatus("");
+                                            }
+                                          }}
+                                        >
+                                          Save
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </DialogContent>
+                                </Dialog>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogTitle>
+                                      Delete Appointment
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete this
+                                      appointment?
+                                    </AlertDialogDescription>
+                                    <div className="flex justify-end space-x-2">
+                                      <AlertDialogCancel>
+                                        Cancel
+                                      </AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() =>
+                                          handleDeleteAppointment(appointment.id)
+                                        }
+                                      >
+                                        Delete
+                                      </AlertDialogAction>
+                                    </div>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
                             </div>
                           </div>
+                        ))
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                          No appointments for this day
                         </div>
-                      ))
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-                        No appointments for this day
-                      </div>
-                    )}
-                  </div>
-                </ScrollArea>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </div>
               </CardContent>
             </Card>
           );
         })}
       </div>
+
+      <Card>
+        <CardContent className="p-6">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={isGenerating}
+              >
+                Generate 2 Week Appointments
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogTitle>Generate Appointments</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will generate appointments for the next 2 weeks. Are you sure you want to continue?
+              </AlertDialogDescription>
+              <div className="flex justify-end space-x-2">
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleGenerateAppointments}>
+                  {isGenerating ? "Generating..." : "Generate"}
+                </AlertDialogAction>
+              </div>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CardContent>
+      </Card>
     </div>
   );
 }
